@@ -31,45 +31,64 @@ We want to compute the gradient of the softmax output $\mathbf{y}$ with respect 
 
 #### Step-by-Step Derivation
 
-1. **Single Element Gradient**:
-   Let's first compute the gradient of a single output element $y_i$ with respect to a single input element $z_k$:
-   ```math
-   \frac{\partial y_i}{\partial z_k}
-   ```
-   There are two cases to consider:
-   - **Case 1: $i = k$**
-     ```math
-     \frac{\partial y_i}{\partial z_i} = \frac{\partial}{\partial z_i} \left( \frac{e^{z_i}}{\sum_{j=1}^n e^{z_j}} \right)
-     ```
-     Using the quotient rule:
-     ```math
-     \frac{\partial y_i}{\partial z_i} = \frac{e^{z_i} \cdot \sum_{j=1}^n e^{z_j} - e^{z_i} \cdot e^{z_i}}{(\sum_{j=1}^n e^{z_j})^2} = \frac{e^{z_i}}{\sum_{j=1}^n e^{z_j}} - \left( \frac{e^{z_i}}{\sum_{j=1}^n e^{z_j}} \right)^2 = y_i (1 - y_i)
-     ```
-   - **Case 2: $i \neq k$**
-     ```math
-     \frac{\partial y_i}{\partial z_k} = \frac{\partial}{\partial z_k} \left( \frac{e^{z_i}}{\sum_{j=1}^n e^{z_j}} \right)
-     ```
-     Again, using the quotient rule:
-     ```math
-     \frac{\partial y_i}{\partial z_k} = \frac{0 - e^{z_i} \cdot e^{z_k}}{(\sum_{j=1}^n e^{z_j})^2} = - \frac{e^{z_i}}{\sum_{j=1}^n e^{z_j}} \cdot \frac{e^{z_k}}{\sum_{j=1}^n e^{z_j}} = - y_i y_k
-     ```
-2. **Vectorial Form**:
-   Combining the two cases, we can write the gradient in vectorial form. Let $\mathbf{y} = \text{softmax}(\mathbf{z})$ and $\mathbf{z} = [z_1, z_2, \dots, z_n]^T$. The gradient $\frac{\partial \mathbf{y}}{\partial \mathbf{z}}$ is a Jacobian matrix $J$ where:
-   ```math
-   J_{ij} = \frac{\partial y_i}{\partial z_j}
-   ```
-   From the derivations above:
-   ```math
-   J_{ij} = \begin{cases}
-   y_i (1 - y_i) & \text{if } i = j \\
-   - y_i y_j & \text{if } i \neq j
-   \end{cases}
-   ```
-   Therefore, the Jacobian matrix $J$ can be written as:
-   ```math
-   J = \text{diag}(\mathbf{y}) - \mathbf{y} \mathbf{y}^T
-   ```
-   where $\text{diag}(\mathbf{y})$ is a diagonal matrix with the elements of $\mathbf{y}$ on the diagonal.
+##### 1. Single Element Gradient
+
+Let's first compute the gradient of a single output element $y_i$ with respect to a single input element $z_k$:
+
+```math
+\frac{\partial y_i}{\partial z_k}
+```
+
+There are two cases to consider:
+
+###### Case 1: $i = k$
+
+```math
+\frac{\partial y_i}{\partial z_i} = \frac{\partial}{\partial z_i} \left( \frac{e^{z_i}}{\sum_{j=1}^n e^{z_j}} \right)
+```
+
+Using the quotient rule:
+
+```math
+\frac{\partial y_i}{\partial z_i} = \frac{e^{z_i} \cdot \sum_{j=1}^n e^{z_j} - e^{z_i} \cdot e^{z_i}}{(\sum_{j=1}^n e^{z_j})^2} = \frac{e^{z_i}}{\sum_{j=1}^n e^{z_j}} - \left( \frac{e^{z_i}}{\sum_{j=1}^n e^{z_j}} \right)^2 = y_i (1 - y_i)
+```
+
+###### Case 2: $i \neq k$
+
+```math
+\frac{\partial y_i}{\partial z_k} = \frac{\partial}{\partial z_k} \left( \frac{e^{z_i}}{\sum_{j=1}^n e^{z_j}} \right)
+```
+
+Again, using the quotient rule:
+
+```math
+\frac{\partial y_i}{\partial z_k} = \frac{0 - e^{z_i} \cdot e^{z_k}}{(\sum_{j=1}^n e^{z_j})^2} = - \frac{e^{z_i}}{\sum_{j=1}^n e^{z_j}} \cdot \frac{e^{z_k}}{\sum_{j=1}^n e^{z_j}} = - y_i y_k
+```
+
+##### 2. Vectorial Form
+
+Combining the two cases, we can write the gradient in vectorial form. Let $\mathbf{y} = \text{softmax}(\mathbf{z})$ and $\mathbf{z} = [z_1, z_2, \dots, z_n]^T$. The gradient $\frac{\partial \mathbf{y}}{\partial \mathbf{z}}$ is a Jacobian matrix $J$ where:
+
+```math
+J_{ij} = \frac{\partial y_i}{\partial z_j}
+```
+
+From the derivations above:
+
+```math
+J_{ij} = \begin{cases}
+y_i (1 - y_i) & \text{if } i = j \\
+- y_i y_j & \text{if } i \neq j
+\end{cases}
+```
+
+Therefore, the Jacobian matrix $J$ can be written as:
+
+```math
+J = \text{diag}(\mathbf{y}) - \mathbf{y} \mathbf{y}^T
+```
+
+where $\text{diag}(\mathbf{y})$ is a diagonal matrix with the elements of $\mathbf{y}$ on the diagonal.
 
 ### Summary
 
@@ -91,45 +110,69 @@ Given a mini-batch of training samples $(\mathbf{X}, \mathbf{Y})$ with a batch s
 
 #### Step-by-Step Feed-Forward Computation
 
-1. **Input Layer:**
-   - For each sample $\mathbf{X}^i \in \mathbb{R}^{L \times D}$, the input remains $\mathbf{X}^i$.
-2. **Transpose Operation (1st Transpose):**
-   - Transpose the input matrix $\mathbf{X}^i$:
-     ```math
-     \mathbf{H}_1 = {\mathbf{X}^i}^T \in \mathbb{R}^{D \times L}
-     ```
-3. **Fully Connected Layer 1 (FC-1) with ReLU Activation:**
-   - Apply the first fully connected layer with weights $\mathbf{\Theta}_1 \in \mathbb{R}^{L \times L}$ and bias $\mathbf{b}_1 \in \mathbb{R}^L$:
-     ```math
-     \mathbf{H}_2 = \mathrm{ReLU}({\mathbf{X}^i}^T \mathbf{\Theta}_1 + \mathbf{1}_D \otimes \mathbf{b}_1) \in \mathbb{R}^{D \times L}
-     ```
-   - Here, $\mathbf{1}_D$ is a vector of ones with dimension $D$.
-4. **Transpose Operation (2nd Transpose):**
-   - Transpose the output of FC-1:
-     ```math
-     \mathbf{H}_3 = \mathbf{H}_2^T = \mathrm{ReLU}(\mathbf{\Theta}_1^T \mathbf{X}^i + \mathbf{b}_1 \otimes \mathbf{1}_D) \in \mathbb{R}^{L \times D}
-     ```
-5. **Skip-Connection:**
-   - Add the original input $\mathbf{X}^i$ to the output of the second transpose:
-     ```math
-     \mathbf{H}_4 = \mathbf{H}_3 + \mathbf{X}^i \in \mathbb{R}^{L \times D}
-     ```
-6. **Fully Connected Layer 2 (FC-2) with ReLU Activation:**
-   - Apply the second fully connected layer with weights $\mathbf{\Theta}_2 \in \mathbb{R}^{D \times D}$ and bias $\mathbf{b}_2 \in \mathbb{R}^D$:
-     ```math
-     \mathbf{H}_5 = \mathrm{ReLU}(\mathbf{H}_4 \mathbf{\Theta}_2 + \mathbf{1}_L \otimes \mathbf{b}_2) \in \mathbb{R}^{L \times D}
-     ```
-   - Here, $\mathbf{1}_L$ is a vector of ones with dimension $L$.
-7. **Mean Operation:**
-   - Compute the mean along the feature dimension:
-     ```math
-     \mathbf{H}_6 = \frac{1}{D} \mathbf{H}_5 \mathbf{1}_D \in \mathbb{R}^L
-     ```
-8. **Fully Connected Layer 3 (FC-3) with Softmax Activation:**
-   - Apply the third fully connected layer with weights $\mathbf{\Theta}_3 \in \mathbb{R}^{L \times K}$ and bias $\mathbf{b}_3 \in \mathbb{R}^K$:
-     ```math
-     \mathbf{\hat{Y}}^i = \mathrm{Softmax}(\mathbf{H}_6 \mathbf{\Theta}_3 + \mathbf{b}_3) \in \mathbb{R}^K
-     ```
+##### 1. Input Layer
+
+For each sample $\mathbf{X}^i \in \mathbb{R}^{L \times D}$, the input remains $\mathbf{X}^i$.
+
+##### 2. Transpose Operation (1st Transpose)
+
+Transpose the input matrix $\mathbf{X}^i$:
+
+```math
+\mathbf{H}_1 = {\mathbf{X}^i}^T \in \mathbb{R}^{D \times L}
+```
+
+##### 3. Fully Connected Layer 1 (FC-1) with ReLU Activation
+
+Apply the first fully connected layer with weights $\mathbf{\Theta}_1 \in \mathbb{R}^{L \times L}$ and bias $\mathbf{b}_1 \in \mathbb{R}^L$:
+
+```math
+\mathbf{H}_2 = \mathrm{ReLU}({\mathbf{X}^i}^T \mathbf{\Theta}_1 + \mathbf{1}_D \otimes \mathbf{b}_1) \in \mathbb{R}^{D \times L}
+```
+
+Here, $\mathbf{1}_D$ is a vector of ones with dimension $D$.
+
+##### 4. Transpose Operation (2nd Transpose)
+
+Transpose the output of FC-1:
+
+```math
+\mathbf{H}_3 = \mathbf{H}_2^T = \mathrm{ReLU}(\mathbf{\Theta}_1^T \mathbf{X}^i + \mathbf{b}_1 \otimes \mathbf{1}_D) \in \mathbb{R}^{L \times D}
+```
+
+##### 5. Skip-Connection
+
+Add the original input $\mathbf{X}^i$ to the output of the second transpose:
+
+```math
+\mathbf{H}_4 = \mathbf{H}_3 + \mathbf{X}^i \in \mathbb{R}^{L \times D}
+```
+
+##### 6. Fully Connected Layer 2 (FC-2) with ReLU Activation
+
+Apply the second fully connected layer with weights $\mathbf{\Theta}_2 \in \mathbb{R}^{D \times D}$ and bias $\mathbf{b}_2 \in \mathbb{R}^D$:
+
+```math
+\mathbf{H}_5 = \mathrm{ReLU}(\mathbf{H}_4 \mathbf{\Theta}_2 + \mathbf{1}_L \otimes \mathbf{b}_2) \in \mathbb{R}^{L \times D}
+```
+
+Here, $\mathbf{1}_L$ is a vector of ones with dimension $L$.
+
+##### 7. Mean Operation
+
+Compute the mean along the feature dimension:
+
+```math
+\mathbf{H}_6 = \frac{1}{D} \mathbf{H}_5 \mathbf{1}_D \in \mathbb{R}^L
+```
+
+##### 8. Fully Connected Layer 3 (FC-3) with Softmax Activation
+
+Apply the third fully connected layer with weights $\mathbf{\Theta}_3 \in \mathbb{R}^{L \times K}$ and bias $\mathbf{b}_3 \in \mathbb{R}^K$:
+
+```math
+\mathbf{\hat{Y}}^i = \mathrm{Softmax}(\mathbf{H}_6 \mathbf{\Theta}_3 + \mathbf{b}_3) \in \mathbb{R}^K
+```
 
 #### Final Predictions
 
