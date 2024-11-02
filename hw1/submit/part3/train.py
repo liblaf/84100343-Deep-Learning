@@ -25,7 +25,9 @@ def get_device() -> torch.device:
 def load_transform(augmentation: str = "") -> v2.Transform:
     match augmentation:
         case "auto":
-            return v2.AutoAugment()
+            return v2.Compose(
+                [v2.AutoAugment(), v2.ToTensor(), v2.Normalize(mean=[0.5], std=[0.5])]
+            )
         case _:
             return v2.Compose([v2.ToTensor(), v2.Normalize(mean=[0.5], std=[0.5])])
 
@@ -155,7 +157,7 @@ def main() -> None:
         project="hw1",
         config={
             "amsgrad": False,
-            "augmentation": "",
+            "augmentation": "auto",
             "batch_size": 64,
             "lr": 0.001,
             "model_name": "mobilenet_v3_large",
