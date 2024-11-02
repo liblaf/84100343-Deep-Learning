@@ -44,7 +44,7 @@ if __name__ == "__main__":
 
     # model define
     parser.add_argument(
-        "--hidden_size", type=int, default=512, help="dimension of model"
+        "--hidden_size", type=int, default=256, help="dimension of model"
     )
 
     # optimization
@@ -53,13 +53,19 @@ if __name__ == "__main__":
     )
     parser.add_argument("--train_epochs", type=int, default=10, help="train epochs")
     parser.add_argument(
-        "--batch_size", type=int, default=32, help="batch size of train input data"
+        "--batch_size", type=int, default=16, help="batch size of train input data"
     )
     parser.add_argument(
-        "--learning_rate", type=float, default=0.05, help="optimizer learning rate"
+        "--learning_rate",
+        type=float,
+        default=0.09297208328663738,
+        help="optimizer learning rate",
     )
     parser.add_argument(
-        "--weight_decay", type=float, default=1e-4, help="optimizer weight decay"
+        "--weight_decay",
+        type=float,
+        default=0.0008607234720977175,
+        help="optimizer weight decay",
     )
 
     args = parser.parse_args()

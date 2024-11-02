@@ -56,7 +56,8 @@ class Model:
         #######################################
         # TODO: weight initialization
         # NOTE: proper initialization can be very important
-        # >>> weight initialization
+        # >>> weight initialization >>>
+        # He Initialization
         self.w_s1 = np.random.normal(
             scale=np.sqrt(2 / self.seq_len), size=(self.seq_len, self.hidden)
         )
@@ -74,7 +75,7 @@ class Model:
             scale=np.sqrt(2 / self.hidden), size=(self.hidden, self.pred_len)
         )
         self.b_t2 = np.zeros((self.pred_len,))
-        # <<< weight initialization
+        # <<< weight initialization <<<
         #######################################
 
         # Reset gradients
@@ -105,7 +106,7 @@ class Model:
 
         #######################################
         # TODO: forward pass
-        # <<< forward pass
+        # >>> forward pass >>>
         z_s1 = seasonal_init @ self.w_s1 + self.b_s1  # (BxN, H)
         h_s1 = np.maximum(z_s1, 0)  # (BxN, H)
         z_s2 = h_s1 @ self.w_s2 + self.b_s2  # (BxN, S)
@@ -115,7 +116,7 @@ class Model:
         h_t1 = np.maximum(z_t1, 0)  # (BxN, H)
         z_t2 = h_t1 @ self.w_t2 + self.b_t2  # (BxN, S)
         trend_output = z_t2  # (BxN, S)
-        # >>> forward pass
+        # <<< forward pass <<<
         #######################################
 
         # Compose seasonal and trend components
@@ -125,14 +126,16 @@ class Model:
 
         #######################################
         # TODO: calculate MSE loss
+        # >>> calculate MSE loss >>>
         loss = MSE(pred, y)
         # ic(loss)
+        # <<< calculate MSE loss <<<
         #######################################
 
         if not forward_only:
             #######################################
             # TODO: backward pass
-            # <<< backward pass
+            # >>> backward pass >>>
             pred_grad = 2 * (pred - y) / pred.size  # (B, S, N)
             x_grad = pred_grad.transpose((0, 2, 1)).reshape(
                 (-1, self.pred_len)
@@ -152,7 +155,7 @@ class Model:
             z_t1_grad = h_t1_grad * (z_t1 > 0)  # (BxN, H)
             self.w_t1_grad = trend_init.T @ z_t1_grad  # (N, H)
             self.b_t1_grad = z_t1_grad.sum(axis=0)  # (H,)
-            # >>> backward pass
+            # <<< backward pass <<<
             #######################################
 
         return pred, loss
@@ -168,7 +171,7 @@ class Model:
 
         #######################################
         # TODO: gradient descent
-        # <<< gradient descent
+        # >>> gradient descent >>>
         self.w_s1 -= lr * (self.w_s1_grad + weight_decay * self.w_s1)
         self.b_s1 -= lr * (self.b_s1_grad + weight_decay * self.b_s1)
         self.w_s2 -= lr * (self.w_s2_grad + weight_decay * self.w_s2)
@@ -178,7 +181,7 @@ class Model:
         self.b_t1 -= lr * (self.b_t1_grad + weight_decay * self.b_t1)
         self.w_t2 -= lr * (self.w_t2_grad + weight_decay * self.w_t2)
         self.b_t2 -= lr * (self.b_t2_grad + weight_decay * self.b_t2)
-        # >>> gradient descent
+        # <<< gradient descent <<<
         #######################################
 
     def state_dict(self):

@@ -136,6 +136,7 @@ class Trainer:
 
         preds = []
         trues = []
+        loss_list: list[float] = []
         folder_path = "./test_results/" + setting + "/"
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
@@ -159,6 +160,17 @@ class Trainer:
                 gt = np.concatenate((input[0, :, -1], true[0, :, -1]), axis=0)
                 pd = np.concatenate((input[0, :, -1], pred[0, :, -1]), axis=0)
                 visual(gt, pd, os.path.join(folder_path, str(i) + ".pdf"))
+
+                mae, mse, rmse, mape, mspe = metric(pred[0, :, -1], true[0, :, -1])
+                loss_list.append(mse)
+
+        losses: np.ndarray = np.asarray(loss_list)
+        argmin = losses.argmin()
+        ic(argmin * 20, losses[argmin])
+        argmax = losses.argmax()
+        ic(argmax * 20, losses[argmax])
+        argmid = losses.argpartition(losses.size // 2)[losses.size // 2]
+        ic(argmid * 20, losses[argmid])
 
         preds = np.array(preds)
         trues = np.array(trues)

@@ -181,4 +181,5 @@ pyrightconfig.json
 
 !pyrightconfig.json
 *.pdf
+*.zip
 wandb/
