@@ -3,7 +3,7 @@ project: hw1
 method: bayes
 metric:
   name: validate/acc
-  goal: minimize
+  goal: maximize
 parameters:
   amsgrad:
     values: [true, false]
