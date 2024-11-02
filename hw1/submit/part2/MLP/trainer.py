@@ -8,6 +8,7 @@ import numpy as np
 import torch
 import wandb
 from data_loader import data_provider
+from icecream import ic
 from utils.metrics import metric
 from utils.tools import EarlyStopping, adjust_learning_rate, visual
 

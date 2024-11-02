@@ -180,6 +180,10 @@ pyrightconfig.json
 *.egg-info
 
 !pyrightconfig.json
+*.npz
 *.pdf
+*.png
 *.zip
+checkpoints/
+prompt.md
 wandb/
