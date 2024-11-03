@@ -220,6 +220,7 @@ class EarlyStopping:
 
 def run() -> None:
     config = wandb.config
+    wandb.define_metric("validate/acc", summary="max")
     model: nn.Module = init_model(len(load_dataset("train").info["label"]))
     criterion: nn.Module = nn.CrossEntropyLoss(
         label_smoothing=config["label_smoothing"]
@@ -259,17 +260,17 @@ def main() -> None:
         config={
             "amsgrad": False,
             "augmentation": "ta_wide",
-            "batch_size": 128,
+            "batch_size": 512,
             "early_stopping_delta": 0.01,
             "early_stopping_patience": 3,
             "label_smoothing": 0.1,
             "lr_min": 0.0,
             "lr_warmup_decay": 0.1,
             "lr_warmup_epochs": 2,
-            "lr": 1e-3,
+            "lr": 0.0019976195957370426,
             "model_name": "mobilenet_v3_large",
             "n_epochs": 20,
-            "weight_decay": 1e-5,
+            "weight_decay": 0.0000010640579453275,
         },
     )
     run()
