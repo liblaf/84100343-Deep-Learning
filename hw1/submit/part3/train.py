@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import functools
+from collections.abc import Sequence
 from typing import TYPE_CHECKING, Literal
 
 import medmnist
@@ -22,7 +23,12 @@ def get_device() -> torch.device:
     return torch.device("cpu")
 
 
-def load_transform(augmentation: str = "none") -> v2.Transform:
+def load_transform(
+    augmentation: str = "none",
+    *,
+    mean: Sequence[float] = [0.5],
+    std: Sequence[float] = [0.5],
+) -> v2.Transform:
     match augmentation:
         case "auto":
             return v2.Compose(
@@ -32,7 +38,7 @@ def load_transform(augmentation: str = "none") -> v2.Transform:
                     v2.AutoAugment(),
                     v2.PILToTensor(),
                     v2.ToDtype(torch.float, scale=True),
-                    v2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+                    v2.Normalize(mean=mean, std=std),
                     v2.RandomErasing(0.1),
                     v2.ToPureTensor(),
                 ]
@@ -46,13 +52,20 @@ def load_transform(augmentation: str = "none") -> v2.Transform:
                     v2.TrivialAugmentWide(),
                     v2.PILToTensor(),
                     v2.ToDtype(torch.float, scale=True),
-                    v2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+                    v2.Normalize(mean=mean, std=std),
                     v2.RandomErasing(0.1),
                     v2.ToPureTensor(),
                 ]
             )
         case "none":
-            return v2.Compose([v2.ToTensor(), v2.Normalize(mean=[0.5], std=[0.5])])
+            return v2.Compose(
+                [
+                    v2.PILToTensor(),
+                    v2.ToDtype(torch.float, scale=True),
+                    v2.Normalize(mean=[0.5], std=[0.5]),
+                    v2.ToPureTensor(),
+                ]
+            )
         case _:
             msg: str = f"Invalid augmentation: {augmentation}"
             raise ValueError(msg)
@@ -63,7 +76,9 @@ def load_dataset(split: Literal["train", "val", "test"]) -> medmnist.PathMNIST:
     config = wandb.config
     dataset: medmnist.PathMNIST = medmnist.PathMNIST(
         split=split,
-        transform=load_transform(config["augmentation"]),
+        transform=load_transform(
+            config["augmentation"] if split == "train" else "none"
+        ),
         download=True,
         size=64,
     )

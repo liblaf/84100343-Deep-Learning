@@ -6,7 +6,7 @@ metric:
   goal: maximize
 parameters:
   amsgrad:
-    values: [true, false]
+    value: false
   augmentation:
     values:
       - auto
