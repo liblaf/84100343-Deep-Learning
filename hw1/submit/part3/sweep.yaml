@@ -9,8 +9,9 @@ parameters:
     values: [true, false]
   augmentation:
     values:
-      - ""
       - auto
+      - none
+      - ta_wide
   batch_size:
     values: [32, 64, 128, 256, 512]
   lr:
@@ -19,11 +20,7 @@ parameters:
     max: 1.0
   model_name:
     values:
-      - efficientnet_b0
-      - mnasnet0_75
-      - mnasnet1_0
       - mobilenet_v3_large
-      - shufflenet_v2_x1_5
   n_epochs:
     value: 20
   weight_decay:

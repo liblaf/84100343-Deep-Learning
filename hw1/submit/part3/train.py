@@ -22,14 +22,40 @@ def get_device() -> torch.device:
     return torch.device("cpu")
 
 
-def load_transform(augmentation: str = "") -> v2.Transform:
+def load_transform(augmentation: str = "none") -> v2.Transform:
     match augmentation:
         case "auto":
             return v2.Compose(
-                [v2.AutoAugment(), v2.ToTensor(), v2.Normalize(mean=[0.5], std=[0.5])]
+                [
+                    v2.RandomHorizontalFlip(),
+                    v2.RandomVerticalFlip(),
+                    v2.AutoAugment(),
+                    v2.PILToTensor(),
+                    v2.ToDtype(torch.float, scale=True),
+                    v2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+                    v2.RandomErasing(0.1),
+                    v2.ToPureTensor(),
+                ]
             )
-        case _:
+        case "ta_wide":
+            # ref: <https://github.com/pytorch/vision/issues/3995#new-recipe-with-reg-tuning>
+            return v2.Compose(
+                [
+                    v2.RandomHorizontalFlip(),
+                    v2.RandomVerticalFlip(),
+                    v2.TrivialAugmentWide(),
+                    v2.PILToTensor(),
+                    v2.ToDtype(torch.float, scale=True),
+                    v2.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+                    v2.RandomErasing(0.1),
+                    v2.ToPureTensor(),
+                ]
+            )
+        case "none":
             return v2.Compose([v2.ToTensor(), v2.Normalize(mean=[0.5], std=[0.5])])
+        case _:
+            msg: str = f"Invalid augmentation: {augmentation}"
+            raise ValueError(msg)
 
 
 @functools.cache
@@ -119,18 +145,52 @@ def valid_or_test(
     return auc, acc
 
 
+def init_lr_scheduler(
+    optimizer: torch.optim.Optimizer,
+) -> torch.optim.lr_scheduler.LRScheduler:
+    config = wandb.config
+    main_lr_scheduler: torch.optim.lr_scheduler.LRScheduler = (
+        torch.optim.lr_scheduler.CosineAnnealingLR(
+            optimizer,
+            T_max=config["n_epochs"] - config["lr_warmup_epochs"],
+            eta_min=config["lr_min"],
+        )
+    )
+    lr_scheduler: torch.optim.lr_scheduler.LRScheduler
+    if config["lr_warmup_epochs"] > 0:
+        warmup_lr_scheduler: torch.optim.lr_scheduler.LRScheduler = (
+            torch.optim.lr_scheduler.LinearLR(
+                optimizer,
+                start_factor=config["lr_warmup_decay"],
+                total_iters=config["lr_warmup_epochs"],
+            )
+        )
+        lr_scheduler = torch.optim.lr_scheduler.SequentialLR(
+            optimizer,
+            [warmup_lr_scheduler, main_lr_scheduler],
+            milestones=[config["lr_warmup_epochs"]],
+        )
+    else:
+        lr_scheduler = main_lr_scheduler
+    return lr_scheduler
+
+
 def run() -> None:
     config = wandb.config
     model: nn.Module = init_model(len(load_dataset("train").info["label"]))
-    criterion: nn.Module = nn.CrossEntropyLoss()
-    optimizer: torch.optim.Optimizer = torch.optim.Adam(
+    criterion: nn.Module = nn.CrossEntropyLoss(
+        label_smoothing=config["label_smoothing"]
+    )
+    optimizer: torch.optim.Optimizer = torch.optim.AdamW(
         model.parameters(),
         lr=config["lr"],
         weight_decay=config["weight_decay"],
         amsgrad=config["amsgrad"],
     )
     lr_scheduler: torch.optim.lr_scheduler.LRScheduler = (
-        torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, config["n_epochs"])
+        torch.optim.lr_scheduler.CosineAnnealingLR(
+            optimizer, T_max=config["n_epochs"] - 5, eta_min=config["lr_min"]
+        )
     )
     best_acc: float = 0.0
     for epoch in range(config["n_epochs"]):
@@ -157,12 +217,16 @@ def main() -> None:
         project="hw1",
         config={
             "amsgrad": False,
-            "augmentation": "auto",
-            "batch_size": 64,
-            "lr": 0.001,
+            "augmentation": "ta_wide",
+            "batch_size": 128,
+            "label_smoothing": 0.1,
+            "lr_min": 0.0,
+            "lr_warmup_decay": 0.1,
+            "lr_warmup_epochs": 5,
+            "lr": 1e-3,
             "model_name": "mobilenet_v3_large",
             "n_epochs": 20,
-            "weight_decay": 0,
+            "weight_decay": 1e-5,
         },
     )
     run()
