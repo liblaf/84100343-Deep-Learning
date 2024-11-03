@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 import functools
-from collections.abc import Sequence
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 import medmnist
 import torch
@@ -13,6 +12,8 @@ from torchvision.transforms import v2
 from tqdm import tqdm
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     import numpy.typing as npt
 
 
@@ -190,6 +191,33 @@ def init_lr_scheduler(
     return lr_scheduler
 
 
+class EarlyStopping:
+    best_score: float = -torch.inf
+    best_state: dict[str, Any]
+    counter: int = 0
+    delta: float = 0.0
+    early_stop: bool = False
+    patience: int = 3
+
+    def __init__(self, patience: int = 3, *, delta: float = 0.0) -> None:
+        self.delta = delta
+        self.patience = patience
+
+    def __call__(self, score: float, model: nn.Module) -> None:
+        if score < self.best_score + self.delta:
+            self.counter += 1
+            if self.counter >= self.patience:
+                self.early_stop = True
+        else:
+            self.best_score = score
+            self.best_state = model.state_dict()
+            self.counter = 0
+            self.save()
+
+    def save(self, path: str = "./checkpoints/best.pt") -> None:
+        torch.save(self.best_state, path)
+
+
 def run() -> None:
     config = wandb.config
     model: nn.Module = init_model(len(load_dataset("train").info["label"]))
@@ -202,12 +230,10 @@ def run() -> None:
         weight_decay=config["weight_decay"],
         amsgrad=config["amsgrad"],
     )
-    lr_scheduler: torch.optim.lr_scheduler.LRScheduler = (
-        torch.optim.lr_scheduler.CosineAnnealingLR(
-            optimizer, T_max=config["n_epochs"] - 5, eta_min=config["lr_min"]
-        )
+    lr_scheduler: torch.optim.lr_scheduler.LRScheduler = init_lr_scheduler(optimizer)
+    early_stopping: EarlyStopping = EarlyStopping(
+        patience=config["early_stopping_patience"], delta=config["early_stopping_delta"]
     )
-    best_acc: float = 0.0
     for epoch in range(config["n_epochs"]):
         train_loss: float = train(model=model, optimizer=optimizer, criterion=criterion)
         wandb.log({"train/loss": train_loss}, step=epoch)
@@ -216,10 +242,10 @@ def run() -> None:
             val_acc: float
             val_auc, val_acc = valid_or_test(model=model, split="val")
         wandb.log({"validate/auc": val_auc, "validate/acc": val_acc}, step=epoch)
+        early_stopping(val_acc, model)
+        if early_stopping.early_stop:
+            break
         lr_scheduler.step()
-        if val_acc > best_acc:
-            best_acc = val_acc
-            torch.save(model.state_dict(), "./checkpoints/best.pt")
     with torch.no_grad():
         test_auc: float
         test_acc: float
@@ -234,10 +260,12 @@ def main() -> None:
             "amsgrad": False,
             "augmentation": "ta_wide",
             "batch_size": 128,
+            "early_stopping_delta": 0.01,
+            "early_stopping_patience": 3,
             "label_smoothing": 0.1,
             "lr_min": 0.0,
             "lr_warmup_decay": 0.1,
-            "lr_warmup_epochs": 5,
+            "lr_warmup_epochs": 2,
             "lr": 1e-3,
             "model_name": "mobilenet_v3_large",
             "n_epochs": 20,

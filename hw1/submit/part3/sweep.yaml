@@ -19,8 +19,7 @@ parameters:
     min: 1e-4
     max: 1.0
   model_name:
-    values:
-      - mobilenet_v3_large
+    value: mobilenet_v3_large
   n_epochs:
     value: 20
   weight_decay:
