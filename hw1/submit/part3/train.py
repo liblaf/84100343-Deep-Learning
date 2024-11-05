@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import medmnist
 import torch
 import wandb
+from icecream import ic
 from torch import nn
 from torchvision import models
 from torchvision.transforms import v2
@@ -260,19 +261,26 @@ def main() -> None:
         config={
             "amsgrad": False,
             "augmentation": "ta_wide",
+            # "augmentation": "none",
             "batch_size": 512,
             "early_stopping_delta": 0.01,
             "early_stopping_patience": 3,
+            # "early_stopping_patience": 100,
             "label_smoothing": 0.1,
+            # "label_smoothing": 0,
             "lr_min": 0.0,
             "lr_warmup_decay": 0.1,
+            # "lr_warmup_decay": 0,
             "lr_warmup_epochs": 2,
+            # "lr_warmup_epochs": 0,
             "lr": 0.0019976195957370426,
             "model_name": "mobilenet_v3_large",
             "n_epochs": 20,
             "weight_decay": 0.0000010640579453275,
+            # "weight_decay": 0,
         },
     )
+    ic(wandb.config)
     run()
 
 

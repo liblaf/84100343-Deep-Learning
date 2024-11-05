@@ -9,11 +9,15 @@ title: "Part Three: Convolutional Neural Network (CNN)"
 
 ### Overview
 
-In this task, we trained a `ResNet-18` model from scratch on the `PathMNIST` dataset for multi-class tissue type classification. The training process was tracked using the W&B experiment management tool, and the model's performance was evaluated on the test set.
+In this task, we trained a `ResNet-18`[^resnet] model from scratch on the `PathMNIST` dataset for multi-class tissue type classification. The training process was tracked using the W&B experiment management tool, and the model's performance was evaluated on the test set.
+
+[^resnet]: He, Kaiming, et al. "Deep residual learning for image recognition." Proceedings of the IEEE conference on computer vision and pattern recognition. 2016.
 
 ### Code Implementation
 
-The code for this task is provided in `task1.py`. The script initializes a `ResNet-18` model, trains it on the `PathMNIST` training set, and evaluates its performance on the validation and test sets. The training process includes logging the training loss and validation metrics (AUC and ACC) using W&B.
+The code for this task is provided in `task1.py`. The script initializes a `ResNet-18` model, trains it on the `PathMNIST` training set, and evaluates its performance on the validation and test sets. The training process includes logging the training loss and validation metrics (AUC and ACC) using W&B[^wandb].
+
+[^wandb]: Biewald, Lukas. Experiment Tracking with Weights and Biases. 2020, https://www.wandb.com/.
 
 ### Training and Validation Curves
 
@@ -79,7 +83,9 @@ In this task, we successfully visualized the saliency maps of the `ResNet-18` mo
 
 ### Overview
 
-In this task, we implemented a custom convolutional neural network (CNN) for the `PathMNIST` dataset. Instead of designing a new network architecture from scratch, we adopted the `MobileNet V3 Large` architecture, which is known for its efficiency and performance. The model was trained from scratch on the `PathMNIST` training set, and its performance was evaluated on the validation and test sets.
+In this task, we implemented a custom convolutional neural network (CNN) for the `PathMNIST` dataset. Instead of designing a new network architecture from scratch, we adopted the `MobileNet V3 Large` architecture[^mobilenetv3], which is known for its efficiency and performance. The model was trained from scratch on the `PathMNIST` training set, and its performance was evaluated on the validation and test sets.
+
+[^mobilenetv3]: Howard, Andrew, et al. "Searching for MobileNetV3." Proceedings of the IEEE/CVF international conference on computer vision. 2019.
 
 ### Code Implementation
 
@@ -146,8 +152,10 @@ We applied the following data augmentation techniques:
 
 - **Random Horizontal Flip**: Flips the image horizontally with a probability of 0.5.
 - **Random Vertical Flip**: Flips the image vertically with a probability of 0.5.
-- **Auto-Augmentation**: Applies a variety of augmentations based on predefined policies.
+- **TrivialAugment Wide**: Dataset-independent data-augmentation with TrivialAugment Wide, as described in "TrivialAugment: Tuning-free Yet State-of-the-Art Data Augmentation"[^muller2021trivialaugment].
 - **Random Erasing**: Randomly erases a portion of the image to improve robustness.
+
+[^muller2021trivialaugment]: Müller, Samuel G., and Frank Hutter. "Trivialaugment: Tuning-free yet state-of-the-art data augmentation." Proceedings of the IEEE/CVF international conference on computer vision. 2021.
 
 ### Learning Rate Strategy
 
@@ -197,15 +205,14 @@ The model's performance on the test set is as follows:
 
 We conducted an ablation study to analyze the impact of each training technique:
 
-|        Config         |     **Test AUC**     |     **Test ACC**     |                           W&B Run                            |
-| :-------------------: | :------------------: | :------------------: | :----------------------------------------------------------: |
-| w/o Data Augmentation |                      |                      |                                                              |
-|  w/o Early Stopping   |                      |                      |                                                              |
-|  w/o Label Smoothing  |                      |                      |                                                              |
-|    w/o LR Strategy    |                      |                      |                                                              |
-|     w/o LR Warmup     |                      |                      |                                                              |
-|   w/o Weight Decay    |                      |                      |                                                              |
-|    Combined (All)     | `0.9875522243532489` | `0.9132311977715878` | [9lffna5i](https://wandb.ai/liblaf-team/hw1/sweeps/9lffna5i) |
+|        Config         |       Test AUC       |       Test ACC       |             Config             |                          W&B Run                           |
+| :-------------------: | :------------------: | :------------------: | :----------------------------: | :--------------------------------------------------------: |
+| w/o Data Augmentation | `0.9366215649689488` | `0.6757660167130919` |     `augmentation: "none"`     | [m9xue0j7](https://wandb.ai/liblaf-team/hw1/runs/m9xue0j7) |
+|  w/o Early Stopping   | `0.982740312828042`  | `0.9096100278551532` | `early_stopping_patience: 100` | [aq9t4t0i](https://wandb.ai/liblaf-team/hw1/runs/aq9t4t0i) |
+|  w/o Label Smoothing  | `0.9801422559418492` | `0.8608635097493036` |      `label_smoothing: 0`      | [ht2xqbf6](https://wandb.ai/liblaf-team/hw1/runs/ht2xqbf6) |
+|     w/o LR Warmup     | `0.976772987588648`  | `0.8536211699164346` |     `lr_warmup_epochs: 0`      | [8bxnk21o](https://wandb.ai/liblaf-team/hw1/runs/8bxnk21o) |
+|   w/o Weight Decay    | `0.9803088549876322` | `0.8692200557103064` |       `weight_decay: 0`        | [hlrr51py](https://wandb.ai/liblaf-team/hw1/runs/hlrr51py) |
+|    Combined (All)     | `0.9875522243532489` | `0.9132311977715878` |                                | [gp5cx33w](https://wandb.ai/liblaf-team/hw1/runs/gp5cx33w) |
 
 ### W&B Sweep
 
@@ -268,3 +275,5 @@ The detailed run can be viewed at [W&B Run for Task 5](https://wandb.ai/liblaf-t
 ### Summary
 
 In this task, we successfully fine-tuned a pre-trained `MobileNet V3 Large` model on the `PathMNIST` dataset. The fine-tuning process demonstrated faster convergence and better performance compared to training a model from scratch. The lower learning rate used during fine-tuning helped in retaining the learned features from the pre-trained model while adapting to the new dataset. This task highlights the benefits of leveraging pre-trained models for transfer learning in achieving superior performance on target datasets.
+
+## References

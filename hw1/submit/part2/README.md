@@ -41,15 +41,15 @@ The model was trained on the ETTh1 dataset, which consists of multivariate time 
 
 ###### Training Loss Curve
 
-![Training Loss Curve](./fig/train_loss.png)
+![Training Loss Curve](./fig/curves/mjhdy9sc-train-loss.png)
 
 ###### Validation Loss Curve
 
-![Validation Loss Curve](./fig/vali_loss.png)
+![Validation Loss Curve](./fig/curves/mjhdy9sc-vali-loss.png)
 
 ###### Test Loss Curve
 
-![Test Loss Curve](./fig/test_loss.png)
+![Test Loss Curve](./fig/curves/mjhdy9sc-test-loss.png)
 
 ### 1.4 Predictions
 
@@ -57,15 +57,15 @@ Sample predictions from the model are shown below:
 
 ###### Good Predictions
 
-![1280.pdf](./fig/1280.pdf)
+![1280.png](./fig/pred/1280.png)
 
 ###### Bad Predictions
 
-![2180.pdf](./fig/2180.pdf)
+![2180.png](./fig/pred/2180.png)
 
 ###### Medium Predictions
 
-![1740.pdf](./fig/1740.pdf)
+![1740.png](./fig/pred/1740.png)
 
 ## Task 2: Hyperparameter Tuning and Evaluation
 
