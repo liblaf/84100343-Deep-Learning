@@ -50,7 +50,7 @@ def main() -> None:
     model.load_state_dict(torch.load("./checkpoints/best.pt"))
     saliency = captum.attr.Saliency(model)
 
-    random_generator: np.random.Generator = np.random.default_rng()
+    random_generator: np.random.Generator = np.random.default_rng(0)
     for input_idx in random_generator.choice(len(dataset), 10, replace=False):
         inputs_, _labels = dataset[input_idx]
         inputs: torch.Tensor = torch.as_tensor(inputs_, device=DEVICE).unsqueeze(0)
