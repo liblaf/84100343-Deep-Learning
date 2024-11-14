@@ -30,8 +30,6 @@ version = "0.0.0"
 dev = ["icecream"]
 
 [tool.pixi.environments]
-cpu = ["dev"]
-cu124 = ["dev"]
 default = ["dev"]
 
 [tool.pixi.project]
