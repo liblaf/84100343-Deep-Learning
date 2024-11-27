@@ -339,6 +339,7 @@ def main() -> None:
             "seq_len": 10,
         },
     )
+    wandb.define_metric("val/loss", summary="min")
     data_loader: WorldModelDataLoader = WorldModelDataLoader(
         batch_size=wandb.config["batch_size"],
         seq_len=wandb.config["seq_len"],
