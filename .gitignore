@@ -183,6 +183,7 @@ pyrightconfig.json
 *.npz
 *.pdf
 *.png
+*.pth
 *.zip
 checkpoints/
 prompt.md
