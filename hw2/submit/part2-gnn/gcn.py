@@ -1,10 +1,11 @@
 import numpy as np
 import numpy.typing as npt
+import sklearn
+import sklearn.metrics
 import torch
 import torch.nn.functional as F
 import wandb
 from jaxtyping import Float
-from sklearn.metrics import r2_score
 from torch import optim
 from torch_geometric.data import Data
 from torch_geometric.datasets import QM9
@@ -105,7 +106,7 @@ def calculate_r2(loader: DataLoader) -> float:
             y_pred_list.append(out.numpy(force=True))
     y_true: Float[npt.NDArray, "N 1"] = np.vstack(y_true_list)
     y_pred: Float[npt.NDArray, "N 1"] = np.vstack(y_pred_list)
-    return r2_score(y_true, y_pred)  # pyright: ignore [reportReturnType]
+    return sklearn.metrics.r2_score(y_true, y_pred)  # pyright: ignore [reportReturnType]
 
 
 r2: float = calculate_r2(test_loader)

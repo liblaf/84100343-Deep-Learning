@@ -26,7 +26,7 @@ test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 
 class GAT(torch.nn.Module):
     def __init__(self, hidden_dim=64, heads=4):
-        super(GAT, self).__init__()
+        super().__init__()
         self.conv1 = GATConv(
             dataset.num_features + 3, hidden_dim, heads=heads, concat=True
         )
