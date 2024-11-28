@@ -1,10 +1,15 @@
-import matplotlib.pyplot as plt
+import numpy as np
+import numpy.typing as npt
+import rich
 import torch
 import torch.nn.functional as F
-import torch.optim as optim
 import wandb
-from torch_geometric.data import DataLoader
+from jaxtyping import Float
+from sklearn.metrics import r2_score
+from torch import optim
+from torch_geometric.data import Data
 from torch_geometric.datasets import QM9
+from torch_geometric.loader import DataLoader
 from torch_geometric.nn import GCNConv, global_mean_pool
 
 path = "./data/QM9"
@@ -22,7 +27,7 @@ test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 
 class GCN(torch.nn.Module):
     def __init__(self, hidden_dim=64):
-        super(GCN, self).__init__()
+        super().__init__()
         self.conv1 = GCNConv(
             dataset.num_features + 3, hidden_dim
         )  # 将节点特征和坐标拼接
@@ -87,3 +92,23 @@ for epoch in range(1, 51):
 test_loss = evaluate(test_loader)
 wandb.summary["test/loss"] = test_loss
 print(f"Test Loss: {test_loss:.4f}")
+
+
+def calculate_r2(loader: DataLoader) -> float:
+    model.eval()
+    y_true_list: list[Float[npt.NDArray, "batch_size 1"]] = []
+    y_pred_list: list[Float[npt.NDArray, "batch_size 1"]] = []
+    with torch.no_grad():
+        for data_ in loader:
+            data: Data = data_.to(device)
+            out: Float[torch.Tensor, "batch_size 1"] = model(data)
+            y_true_list.append(data.y[:, DIPOLE_INDEX].unsqueeze(1).numpy(force=True))
+            y_pred_list.append(out.numpy(force=True))
+    y_true: Float[npt.NDArray, "N 1"] = np.vstack(y_true_list)
+    y_pred: Float[npt.NDArray, "N 1"] = np.vstack(y_pred_list)
+    return r2_score(y_true, y_pred)  # pyright: ignore [reportReturnType]
+
+
+r2: float = calculate_r2(test_loader)
+wandb.summary["test/r2"] = r2
+print(f"Test R2 Score: {r2:.4f}")
