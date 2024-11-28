@@ -39,10 +39,15 @@ class GCN(torch.nn.Module):
         x = torch.cat([data.x, data.pos], dim=1)
         edge_index = data.edge_index
         batch = data.batch
+        ic(x.shape)
         x = F.relu(self.conv1(x, edge_index))
+        ic(x.shape)
         x = F.relu(self.conv2(x, edge_index))
+        ic(x.shape)
         x = global_mean_pool(x, batch)
+        ic(x.shape)
         x = self.lin(x)
+        ic(x.shape)
         return x
 
 
