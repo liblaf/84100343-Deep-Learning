@@ -1,6 +1,5 @@
 import pickle
 from pathlib import Path
-from turtle import Shape
 
 import numpy.typing as npt
 import pooch
@@ -134,7 +133,7 @@ class WorldModelDataLoader:
 class LSTM(nn.Module):
     input_to_hidden: nn.Linear
 
-    def __init__(self, input_size: int, hidden_size: int, output_size: int) -> None:
+    def __init__(self, input_size: int, hidden_size: int) -> None:
         super().__init__()
         self.input_to_hidden = nn.Linear(input_size, 4 * hidden_size, bias=False)
         self.hidden_to_hidden = nn.Linear(hidden_size, 4 * hidden_size, bias=False)
@@ -172,13 +171,13 @@ class LSTM(nn.Module):
 
 
 class WorldModel(nn.Module):
-    lstm: nn.LSTM
+    lstm: LSTM
     decoder: nn.Linear
 
     def __init__(self, input_size: int, hidden_size: int, output_size: int) -> None:
         super().__init__()
-        self.lstm = nn.LSTM(input_size=input_size, hidden_size=hidden_size)
-        self.decoder = nn.Linear(self.lstm.hidden_size, output_size)
+        self.lstm = LSTM(input_size, hidden_size)
+        self.decoder = nn.Linear(hidden_size, output_size)
 
     def forward(
         self, state: BState, action: BAction, hidden: tuple[F1BH, F1BH]
@@ -202,13 +201,13 @@ class WorldModel(nn.Module):
         input_tensor: BI = torch.hstack(
             [state.view(batch_size, state_size), action.view(batch_size, action_size)]
         )
-        features: F1BH
-        features, hidden = self.lstm(
+        next_state_features: F1BH
+        next_state_features, hidden = self.lstm(
             input_tensor.view(1, batch_size, input_size), hidden
         )
         hidden_size: int = hidden[0].shape[-1]
-        features: BH = features.view(batch_size, hidden_size)
-        next_state_pred: BO = self.decoder(features)
+        next_state_features: BH = next_state_features.view(batch_size, hidden_size)
+        next_state_pred: BO = self.decoder(next_state_features)
         return next_state_pred, hidden
 
 
