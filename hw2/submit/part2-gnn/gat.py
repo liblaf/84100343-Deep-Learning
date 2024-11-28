@@ -1,15 +1,15 @@
 import numpy as np
 import numpy.typing as npt
+import sklearn.metrics
 import torch
 import torch.nn.functional as F
 import wandb
 from jaxtyping import Float
-from sklearn.metrics import r2_score
 from torch import optim
 from torch_geometric.data import Data
 from torch_geometric.datasets import QM9
 from torch_geometric.loader import DataLoader
-from torch_geometric.nn import GCNConv, global_mean_pool
+from torch_geometric.nn import GATConv, global_mean_pool
 
 path = "./data/QM9"
 dataset = QM9(path)
@@ -24,13 +24,13 @@ val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
 test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 
 
-class GCN(torch.nn.Module):
-    def __init__(self, hidden_dim=64):
-        super().__init__()
-        self.conv1 = GCNConv(
-            dataset.num_features + 3, hidden_dim
-        )  # 将节点特征和坐标拼接
-        self.conv2 = GCNConv(hidden_dim, hidden_dim)
+class GAT(torch.nn.Module):
+    def __init__(self, hidden_dim=64, heads=4):
+        super(GAT, self).__init__()
+        self.conv1 = GATConv(
+            dataset.num_features + 3, hidden_dim, heads=heads, concat=True
+        )
+        self.conv2 = GATConv(hidden_dim * heads, hidden_dim, heads=1, concat=False)
         self.lin = torch.nn.Linear(hidden_dim, 1)  # 输出偶极矩
 
     def forward(self, data):
@@ -38,15 +38,15 @@ class GCN(torch.nn.Module):
         x = torch.cat([data.x, data.pos], dim=1)
         edge_index = data.edge_index
         batch = data.batch
-        x = F.relu(self.conv1(x, edge_index))
-        x = F.relu(self.conv2(x, edge_index))
+        x = F.elu(self.conv1(x, edge_index))
+        x = F.elu(self.conv2(x, edge_index))
         x = global_mean_pool(x, batch)
         x = self.lin(x)
         return x
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = GCN(hidden_dim=128).to(device)
+model = GAT(hidden_dim=128).to(device)
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 
@@ -77,7 +77,7 @@ def evaluate(loader):
 
 
 # 训练模型
-wandb.init(group="GCN")
+wandb.init(group="GAT")
 train_losses, val_losses = [], []
 for epoch in range(1, 51):
     train_loss = train()
@@ -105,7 +105,7 @@ def calculate_r2(loader: DataLoader) -> float:
             y_pred_list.append(out.numpy(force=True))
     y_true: Float[npt.NDArray, "N 1"] = np.vstack(y_true_list)
     y_pred: Float[npt.NDArray, "N 1"] = np.vstack(y_pred_list)
-    return r2_score(y_true, y_pred)  # pyright: ignore [reportReturnType]
+    return sklearn.metrics.r2_score(y_true, y_pred)  # pyright: ignore [reportReturnType]
 
 
 r2: float = calculate_r2(test_loader)
