@@ -151,11 +151,14 @@ class LSTM(nn.Module):
         input_size: int = input.shape[-1]
         hidden_size: int = hidden_state.shape[-1]
         input: BI = input.view(batch_size, input_size)  # noqa: A001
+        hidden_state: BH = hidden_state.view(batch_size, hidden_size)
+        cell_state: BH = cell_state.view(batch_size, hidden_size)
         activation: Float[torch.Tensor, "batch_size H=4*hidden_size"] = (
             self.input_to_hidden(input)
             + self.hidden_to_hidden(hidden_state)
             + self.bias
         )
+        ic(activation.shape)
         ai: BH
         af: BH
         ao: BH
