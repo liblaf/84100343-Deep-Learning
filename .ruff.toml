@@ -3,4 +3,8 @@ extend = ".github/linters/.ruff.toml"
 extend-exclude = ["attachment"]
 
 [lint]
-extend-ignore = ["F722"]
+extend-ignore = ["F722", "N812"]
+
+[lint.flake8-import-conventions.aliases]
+"torch.nn.functional" = "F"
+"torch_geometric.nn" = "tgnn"
