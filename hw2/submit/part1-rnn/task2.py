@@ -167,7 +167,10 @@ class LSTM(nn.Module):
         block_input: BH = torch.tanh(ag)
         next_cell_state: BH = forget_gate * cell_state + input_gate * block_input
         next_hidden_state: BH = output_gate * torch.tanh(next_cell_state)
-        return next_hidden_state, (next_hidden_state, next_cell_state)
+        return next_hidden_state, (
+            next_hidden_state.view(1, batch_size, hidden_size),
+            next_cell_state.view(1, batch_size, hidden_size),
+        )
 
 
 class WorldModel(nn.Module):
