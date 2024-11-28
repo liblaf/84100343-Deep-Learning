@@ -4,7 +4,7 @@ import functools
 from typing import TYPE_CHECKING, Any, Literal
 
 import medmnist
-import torch
+import torch.utils.data
 import wandb
 from torch import nn
 from torchvision import models
