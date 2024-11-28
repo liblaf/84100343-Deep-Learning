@@ -1,3 +1,8 @@
+---
+header: Deep Learning (84100343-0)
+title: "Part 1: Modeling World Dynamics with Recurrent Neural Networks"
+---
+
 # Part 1: Modeling World Dynamics with Recurrent Neural Networks
 
 ## Task 1: Define and Train an LSTM-based World Model
