@@ -158,7 +158,6 @@ class LSTM(nn.Module):
             + self.hidden_to_hidden(hidden_state)
             + self.bias
         )
-        ic(activation.shape)
         ai: BH
         af: BH
         ao: BH
