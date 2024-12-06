@@ -1,7 +1,7 @@
-import torch
-import torch.nn as nn
-import torch.optim as optim
 import pickle
+
+import torch
+from torch import nn, optim
 
 with open("car_racing_data_32x32_120.pkl", "rb") as f:
     data = pickle.load(f)
@@ -9,13 +9,12 @@ with open("car_racing_data_32x32_120.pkl", "rb") as f:
 class WorldModel(nn.Module):
     def __init__(self, action_size, hidden_size, output_size):
         super(WorldModel, self).__init__()
-        pass
 
     def forward(self, state, action, hidden=None):
-        """
-        TODO: Implement your model here. You should implement two models, one using built-in lstm layers and one implemented by yourself.
+        """TODO: Implement your model here. You should implement two models, one using built-in lstm layers and one implemented by yourself.
 
         Forward pass for the WorldModel.
+
         Args:
             state: Tensor of shape [batch_size, 3, 32, 32] (current RGB image at this time step).
             action: Tensor of shape [batch_size, action_size] (3-dimensional action vector).
@@ -25,7 +24,6 @@ class WorldModel(nn.Module):
             next_state_pred: Tensor of shape [batch_size, output_size] (flattened next state prediction, 3*32*32).
             hidden: Updated hidden state tuple (h_t, c_t) for the LSTM.
         """
-        pass
 
 class WorldModelDataLoader:
     def __init__(self, data, batch_size, sequence_length, device):
@@ -75,8 +73,8 @@ class WorldModelDataLoader:
 
         self.sub_index += self.sequence_length
         if self.sub_index >= len(self.current_data[self.index]):
-            self.index += self.batch_size  
-            self.sub_index = 0  
+            self.index += self.batch_size
+            self.sub_index = 0
         states = torch.stack(states).to(self.device)
         actions = torch.stack(actions).to(self.device)
 
@@ -101,7 +99,7 @@ criterion = nn.MSELoss()
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
 def train(num_epochs=50):
-    best_val_loss = float('inf') 
+    best_val_loss = float("inf")
 
     for epoch in range(num_epochs):
         model.train()

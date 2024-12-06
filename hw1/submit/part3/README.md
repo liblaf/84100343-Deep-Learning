@@ -17,7 +17,7 @@ In this task, we trained a `ResNet-18`[^resnet] model from scratch on the `PathM
 
 The code for this task is provided in `task1.py`. The script initializes a `ResNet-18` model, trains it on the `PathMNIST` training set, and evaluates its performance on the validation and test sets. The training process includes logging the training loss and validation metrics (AUC and ACC) using W&B[^wandb].
 
-[^wandb]: Biewald, Lukas. Experiment Tracking with Weights and Biases. 2020, https://www.wandb.com/.
+[^wandb]: Biewald, Lukas. Experiment Tracking with Weights and Biases. 2020, <https://www.wandb.com/>.
 
 ### Training and Validation Curves
 
@@ -63,7 +63,7 @@ The code for this task is provided in `task2.py`. The script loads the trained `
 Below is an example of the input image and its corresponding saliency map:
 
 | Index | Label |           Input Image            |            Saliency Map             |
-| :---: | :---: | :------------------------------: | :---------------------------------: |
+|:-----:|:-----:|:--------------------------------:|:-----------------------------------:|
 | 06099 |   6   | ![](./fig/task2/06099-input.png) | ![](./fig/task2/06099-saliency.png) |
 | 05839 |   8   | ![](./fig/task2/05839-input.png) | ![](./fig/task2/05839-saliency.png) |
 | 04568 |   8   | ![](./fig/task2/04568-input.png) | ![](./fig/task2/04568-saliency.png) |
@@ -206,7 +206,7 @@ The model's performance on the test set is as follows:
 We conducted an ablation study to analyze the impact of each training technique:
 
 |        Config         |       Test AUC       |       Test ACC       |             Config             |                          W&B Run                           |
-| :-------------------: | :------------------: | :------------------: | :----------------------------: | :--------------------------------------------------------: |
+|:---------------------:|:--------------------:|:--------------------:|:------------------------------:|:----------------------------------------------------------:|
 | w/o Data Augmentation | `0.9366215649689488` | `0.6757660167130919` |     `augmentation: "none"`     | [m9xue0j7](https://wandb.ai/liblaf-team/hw1/runs/m9xue0j7) |
 |  w/o Early Stopping   | `0.982740312828042`  | `0.9096100278551532` | `early_stopping_patience: 100` | [aq9t4t0i](https://wandb.ai/liblaf-team/hw1/runs/aq9t4t0i) |
 |  w/o Label Smoothing  | `0.9801422559418492` | `0.8608635097493036` |      `label_smoothing: 0`      | [ht2xqbf6](https://wandb.ai/liblaf-team/hw1/runs/ht2xqbf6) |
@@ -263,7 +263,7 @@ The model's performance on the test set is as follows:
 ### Comparison with Training from Scratch
 
 |      Metrics      |     Fine-Tuning      | Training from Scratch |
-| :---------------: | :------------------: | :-------------------: |
+|:-----------------:|:--------------------:|:---------------------:|
 | Convergence Epoch |        `6` 😆        |        `13` 😣        |
 |     Test AUC      | `0.9889362648935928` | `0.9875522243532489`  |
 |     Test ACC      | `0.9122562674094707` | `0.9132311977715878`  |

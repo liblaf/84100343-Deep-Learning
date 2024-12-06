@@ -1,8 +1,9 @@
-import numpy as np
-import matplotlib.pyplot as plt
 import pickle
 
-plt.switch_backend('agg')
+import matplotlib.pyplot as plt
+import numpy as np
+
+plt.switch_backend("agg")
 
 
 def adjust_learning_rate(epoch, args):
@@ -16,7 +17,7 @@ class EarlyStopping:
         self.counter = 0
         self.best_score = None
         self.early_stop = False
-        self.val_loss_min = np.Inf
+        self.val_loss_min = np.inf
         self.delta = delta
 
     def __call__(self, val_loss, model, path):
@@ -26,7 +27,7 @@ class EarlyStopping:
             self.save_checkpoint(val_loss, model, path)
         elif score < self.best_score + self.delta:
             self.counter += 1
-            print(f'EarlyStopping counter: {self.counter} out of {self.patience}')
+            print(f"EarlyStopping counter: {self.counter} out of {self.patience}")
             if self.counter >= self.patience:
                 self.early_stop = True
         else:
@@ -36,12 +37,12 @@ class EarlyStopping:
 
     def save_checkpoint(self, val_loss, model, path):
         if self.verbose:
-            print(f'Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ...')
-        pickle.dump(model.state_dict(), open(path + '/' + 'checkpoint.pth', 'wb'))
+            print(f"Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ...")
+        pickle.dump(model.state_dict(), open(path + "/" + "checkpoint.pth", "wb"))
         self.val_loss_min = val_loss
 
 
-class StandardScaler():
+class StandardScaler:
     def __init__(self, mean, std):
         self.mean = mean
         self.std = std
@@ -53,13 +54,13 @@ class StandardScaler():
         return (data * self.std) + self.mean
 
 
-def visual(true, preds=None, name='./pic/test.pdf'):
-    
+def visual(true, preds=None, name="./pic/test.pdf"):
+
     # Results visualization
-    
+
     plt.figure()
-    plt.plot(true, label='GroundTruth', linewidth=2)
+    plt.plot(true, label="GroundTruth", linewidth=2)
     if preds is not None:
-        plt.plot(preds, label='Prediction', linewidth=2)
+        plt.plot(preds, label="Prediction", linewidth=2)
     plt.legend()
-    plt.savefig(name, bbox_inches='tight')
+    plt.savefig(name, bbox_inches="tight")

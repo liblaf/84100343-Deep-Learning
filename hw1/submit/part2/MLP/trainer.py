@@ -75,23 +75,19 @@ class Trainer:
 
                 if (i + 1) % 100 == 0:
                     print(
-                        "\titers: {0}, epoch: {1} | loss: {2:.7f}".format(
-                            i + 1, epoch + 1, loss.item()
-                        )
+                        f"\titers: {i + 1}, epoch: {epoch + 1} | loss: {loss.item():.7f}"
                     )
                     speed = (time.time() - time_now) / iter_count
                     left_time = speed * (
                         (self.args.train_epochs - epoch) * train_steps - i
                     )
                     print(
-                        "\tspeed: {:.4f}s/iter; left time: {:.4f}s".format(
-                            speed, left_time
-                        )
+                        f"\tspeed: {speed:.4f}s/iter; left time: {left_time:.4f}s"
                     )
                     iter_count = 0
                     time_now = time.time()
 
-            print("Epoch: {} cost time: {}".format(epoch + 1, time.time() - epoch_time))
+            print(f"Epoch: {epoch + 1} cost time: {time.time() - epoch_time}")
             train_loss = np.average(train_loss)
             vali_loss = self.vali(vali_data, vali_loader)
             test_loss = self.vali(test_data, test_loader)
@@ -107,9 +103,7 @@ class Trainer:
             # <<< Weights & Biases
 
             print(
-                "Epoch: {0}, Steps: {1} | Train Loss: {2:.7f} Vali Loss: {3:.7f} Test Loss: {4:.7f}".format(
-                    epoch + 1, train_steps, train_loss, vali_loss, test_loss
-                )
+                f"Epoch: {epoch + 1}, Steps: {train_steps} | Train Loss: {train_loss:.7f} Vali Loss: {vali_loss:.7f} Test Loss: {test_loss:.7f}"
             )
             early_stopping(vali_loss, self.model, path)
             if early_stopping.early_stop:
@@ -186,10 +180,10 @@ class Trainer:
             os.makedirs(folder_path)
 
         mae, mse, rmse, mape, mspe = metric(preds, trues)
-        print("mse:{}, mae:{}".format(mse, mae))
+        print(f"mse:{mse}, mae:{mae}")
         f = open("result_long_term_forecast.txt", "a")
         f.write(setting + "  \n")
-        f.write("mse:{}, mae:{}".format(mse, mae))
+        f.write(f"mse:{mse}, mae:{mae}")
         f.write("\n")
         f.write("\n")
         f.close()
@@ -198,4 +192,3 @@ class Trainer:
         np.save(folder_path + "pred.npy", preds)
         np.save(folder_path + "true.npy", trues)
 
-        return

@@ -1,14 +1,15 @@
 import os
-import pandas as pd
-from torch.utils.data import Dataset, DataLoader
-from sklearn.preprocessing import StandardScaler
 import warnings
 
-warnings.filterwarnings('ignore')
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+from torch.utils.data import DataLoader, Dataset
+
+warnings.filterwarnings("ignore")
 
 
 def data_provider(args, flag):
-    if flag == 'test':
+    if flag == "test":
         shuffle_flag = False
         drop_last = True
         batch_size = 1  # bsz=1 for evaluation
@@ -34,8 +35,8 @@ def data_provider(args, flag):
 
 
 class Dataset_ETT_hour(Dataset):
-    def __init__(self, root_path, flag='train', size=None,
-                 data_path='ETTh1.csv', scale=True, freq='h'):
+    def __init__(self, root_path, flag="train", size=None,
+                 data_path="ETTh1.csv", scale=True, freq="h"):
         # size [seq_len, pred_len]
         # info
         if size == None:
@@ -45,8 +46,8 @@ class Dataset_ETT_hour(Dataset):
             self.seq_len = size[0]
             self.pred_len = size[1]
         # init
-        assert flag in ['train', 'test', 'val']
-        type_map = {'train': 0, 'val': 1, 'test': 2}
+        assert flag in ["train", "test", "val"]
+        type_map = {"train": 0, "val": 1, "test": 2}
         self.set_type = type_map[flag]
 
         self.scale = scale

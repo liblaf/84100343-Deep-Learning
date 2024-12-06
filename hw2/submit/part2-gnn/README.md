@@ -10,7 +10,7 @@ title: "Part Two: Graph Neural Networks (GNN)"
 ### Results
 
 |   Model   |     Test Loss      |  Test $R^2$ Score   |
-| :-------: | :----------------: | :-----------------: |
+|:---------:|:------------------:|:-------------------:|
 |    GCN    | 0.8823628215789795 | 0.4510267972946167  |
 |    GAT    | 0.9193381261825562 | 0.4280221462249756  |
 | GraphSAGE | 0.8692418508529663 | 0.45919013023376465 |
@@ -83,7 +83,7 @@ class GIN(nn.Module):
 After training the GIN model on the QM9 dataset, the model performance metrics were:
 
 | Model |     Test Loss      |  Test $R^2$ Score  |
-| :---: | :----------------: | :----------------: |
+|:-----:|:------------------:|:------------------:|
 |  GIN  | 0.7374625625610352 | 0.5411783456802368 |
 
 These results indicate that the GIN model outperforms the previously tested models, such as GCN, GAT, and GraphSAGE in Task A, in terms of both test loss and $R^2$ score.
