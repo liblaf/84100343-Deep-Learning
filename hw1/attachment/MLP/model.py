@@ -1,10 +1,10 @@
-import numpy as np
 import copy
+
+import numpy as np
 
 
 def moving_avg(x, kernel_size, stride):
-    """
-    Moving average to highlight the trend of time series
+    """Moving average to highlight the trend of time series
 
     :param x: [bs, seq_len, num_dim]
     :param kernel_size: int
@@ -24,8 +24,7 @@ def moving_avg(x, kernel_size, stride):
 
 
 def series_decomp(x, kernel_size=25):
-    """
-    Series decomposition
+    """Series decomposition
 
     :param x: [bs, seq_len, num_dim]
     :param kernel_size: int
@@ -49,7 +48,6 @@ class Model:
 
     def init_weights(self):
         """Initialize weights."""
-
         #######################################
         # TODO: weight initialization
         # NOTE: proper initialization can be very important
@@ -125,33 +123,31 @@ class Model:
         :param lr: learning rate
         :param weight_decay: weight decay
         """
-
         #######################################
         # TODO: gradient descent
-        pass
         #######################################
 
     def state_dict(self):
         return copy.deepcopy({
-            'w_s1': self.w_s1,
-            'b_s1': self.b_s1,
-            'w_s2': self.w_s2,
-            'b_s2': self.b_s2,
-            'w_t1': self.w_t1,
-            'b_t1': self.b_t1,
-            'w_t2': self.w_t2,
-            'b_t2': self.b_t2,
+            "w_s1": self.w_s1,
+            "b_s1": self.b_s1,
+            "w_s2": self.w_s2,
+            "b_s2": self.b_s2,
+            "w_t1": self.w_t1,
+            "b_t1": self.b_t1,
+            "w_t2": self.w_t2,
+            "b_t2": self.b_t2,
         })
 
     def load_state_dict(self, state_dict):
-        self.w_s1 = state_dict['w_s1']
-        self.b_s1 = state_dict['b_s1']
-        self.w_s2 = state_dict['w_s2']
-        self.b_s2 = state_dict['b_s2']
-        self.w_t1 = state_dict['w_t1']
-        self.b_t1 = state_dict['b_t1']
-        self.w_t2 = state_dict['w_t2']
-        self.b_t2 = state_dict['b_t2']
+        self.w_s1 = state_dict["w_s1"]
+        self.b_s1 = state_dict["b_s1"]
+        self.w_s2 = state_dict["w_s2"]
+        self.b_s2 = state_dict["b_s2"]
+        self.w_t1 = state_dict["w_t1"]
+        self.b_t1 = state_dict["b_t1"]
+        self.w_t2 = state_dict["w_t2"]
+        self.b_t2 = state_dict["b_t2"]
 
     def check_grad(self):
         """Check backward propagation implementation. This is naively implemented with finite difference method.
@@ -169,7 +165,7 @@ class Model:
         def relative_error(z1, z2):
             return np.mean((z1 - z2) ** 2 / (z1 ** 2 + z2 ** 2))
 
-        print('Gradient check of backward propagation:')
+        print("Gradient check of backward propagation:")
 
         # generate random test data
         x = np.random.rand(5, self.seq_len, 3)
@@ -192,14 +188,14 @@ class Model:
         epsilon = 1e-5
 
         weights_dict = {
-            'w_s1': (self.w_s1, self.w_s1_grad),
-            'b_s1': (self.b_s1, self.b_s1_grad),
-            'w_s2': (self.w_s2, self.w_s2_grad),
-            'b_s2': (self.b_s2, self.b_s2_grad),
-            'w_t1': (self.w_t1, self.w_t1_grad),
-            'b_t1': (self.b_t1, self.b_t1_grad),
-            'w_t2': (self.w_t2, self.w_t2_grad),
-            'b_t2': (self.b_t2, self.b_t2_grad),
+            "w_s1": (self.w_s1, self.w_s1_grad),
+            "b_s1": (self.b_s1, self.b_s1_grad),
+            "w_s2": (self.w_s2, self.w_s2_grad),
+            "b_s2": (self.b_s2, self.b_s2_grad),
+            "w_t1": (self.w_t1, self.w_t1_grad),
+            "b_t1": (self.b_t1, self.b_t1_grad),
+            "w_t2": (self.w_t2, self.w_t2_grad),
+            "b_t2": (self.b_t2, self.b_t2_grad),
         }
 
         for name, (weight, gradient) in weights_dict.items():
@@ -212,8 +208,8 @@ class Model:
                     weight[i] -= epsilon
                     numeric[i] = (loss_prime - loss) / epsilon
                 re = relative_error(numeric, gradient)
-                print(f'Relative error of d{name}', re)
-                assert re < 1e-5, 'Gradient check failed. If you implement back propagation correctly, all these relative errors should be less than 1e-5.'
+                print(f"Relative error of d{name}", re)
+                assert re < 1e-5, "Gradient check failed. If you implement back propagation correctly, all these relative errors should be less than 1e-5."
             else:
                 numeric = np.zeros_like(weight)
                 for i in range(weight.shape[0]):
@@ -223,10 +219,10 @@ class Model:
                         weight[i, j] -= epsilon
                         numeric[i, j] = (loss_prime - loss) / epsilon
                 re = relative_error(numeric, gradient)
-                print(f'Relative error of d{name}', re)
-                assert re < 1e-5, 'Gradient check failed. If you implement back propagation correctly, all these relative errors should be less than 1e-5.'
+                print(f"Relative error of d{name}", re)
+                assert re < 1e-5, "Gradient check failed. If you implement back propagation correctly, all these relative errors should be less than 1e-5."
 
-        print('Gradient check passed!')
+        print("Gradient check passed!")
 
         # restore original values
         self.load_state_dict(state_dict)

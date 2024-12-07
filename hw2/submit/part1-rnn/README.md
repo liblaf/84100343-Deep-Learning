@@ -208,7 +208,7 @@ The following comparisons show predictions from both rollout strategies against 
 **Examples**:
 
 | Step |                Ground Truth                |          Teacher Forcing Prediction           |              Autoregressive Prediction               |
-| :--: | :----------------------------------------: | :-------------------------------------------: | :--------------------------------------------------: |
+|:----:|:------------------------------------------:|:---------------------------------------------:|:----------------------------------------------------:|
 |  0   | ![GT Step 0](fig/task3/ground-truth/0.png) | ![TF Step 0](fig/task3/teacher-forcing/0.png) | ![AR Step 0](fig/task3/autoregressive-rollout/0.png) |
 |  1   | ![GT Step 1](fig/task3/ground-truth/1.png) | ![TF Step 1](fig/task3/teacher-forcing/1.png) | ![AR Step 1](fig/task3/autoregressive-rollout/1.png) |
 |  2   | ![GT Step 2](fig/task3/ground-truth/2.png) | ![TF Step 2](fig/task3/teacher-forcing/2.png) | ![AR Step 2](fig/task3/autoregressive-rollout/2.png) |

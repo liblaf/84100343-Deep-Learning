@@ -19,20 +19,13 @@ def main(args: argparse.Namespace) -> None:
     print(args)
 
     # setting record of experiments
-    setting = "{}_{}_{}_sl{}_pl{}_hs{}".format(
-        args.model_id,
-        args.model,
-        args.data,
-        args.seq_len,
-        args.pred_len,
-        args.hidden_size,
-    )
+    setting = f"{args.model_id}_{args.model}_{args.data}_sl{args.seq_len}_pl{args.pred_len}_hs{args.hidden_size}"
 
     trainer = Trainer(args)  # set experiments
-    print(">>>>>>>start training : {}>>>>>>>>>>>>>>>>>>>>>>>>>>".format(setting))
+    print(f">>>>>>>start training : {setting}>>>>>>>>>>>>>>>>>>>>>>>>>>")
     trainer.train(setting)
 
-    print(">>>>>>>testing : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<".format(setting))
+    print(f">>>>>>>testing : {setting}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
     trainer.test(setting)
 
 

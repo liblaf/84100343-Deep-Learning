@@ -1,15 +1,12 @@
 import torch
 import torch.nn.functional as F
+from torch import optim
 from torch_geometric.data import DataLoader
 from torch_geometric.datasets import QM9
-from torch_geometric.nn import GCNConv, GATConv, global_mean_pool
-from torch_geometric.nn import SAGEConv
-import torch.optim as optim
-import matplotlib.pyplot as plt
-
+from torch_geometric.nn import SAGEConv, global_mean_pool
 
 # 定义数据集和特征索引
-path = './data/QM9'
+path = "./data/QM9"
 dataset = QM9(path)
 DIPOLE_INDEX = 0  # 偶极矩在 y 中的位置
 
@@ -40,8 +37,8 @@ class GraphSAGE(torch.nn.Module):
         x = self.lin(x)
         return x
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model = GraphSAGE(hidden_dim=128).to(device)  
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model = GraphSAGE(hidden_dim=128).to(device)
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 def train():
@@ -69,12 +66,12 @@ def evaluate(loader):
     return total_loss / len(loader.dataset)
 
 train_losses, val_losses = [], []
-for epoch in range(1, 51): 
+for epoch in range(1, 51):
     train_loss = train()
     val_loss = evaluate(val_loader)
     train_losses.append(train_loss)
     val_losses.append(val_loss)
-    print(f'Epoch: {epoch:03d}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}')
+    print(f"Epoch: {epoch:03d}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}")
 
 test_loss = evaluate(test_loader)
-print(f'Test Loss: {test_loss:.4f}')
+print(f"Test Loss: {test_loss:.4f}")

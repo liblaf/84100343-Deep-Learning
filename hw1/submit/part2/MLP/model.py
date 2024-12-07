@@ -5,8 +5,7 @@ from utils.metrics import MSE
 
 
 def moving_avg(x, kernel_size, stride):
-    """
-    Moving average to highlight the trend of time series
+    """Moving average to highlight the trend of time series
 
     :param x: [bs, seq_len, num_dim]
     :param kernel_size: int
@@ -28,8 +27,7 @@ def moving_avg(x, kernel_size, stride):
 
 
 def series_decomp(x, kernel_size=25):
-    """
-    Series decomposition
+    """Series decomposition
 
     :param x: [bs, seq_len, num_dim]
     :param kernel_size: int
@@ -52,7 +50,6 @@ class Model:
 
     def init_weights(self):
         """Initialize weights."""
-
         #######################################
         # TODO: weight initialization
         # NOTE: proper initialization can be very important
@@ -168,7 +165,6 @@ class Model:
         :param lr: learning rate
         :param weight_decay: weight decay
         """
-
         #######################################
         # TODO: gradient descent
         # >>> gradient descent >>>
