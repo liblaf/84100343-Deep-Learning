@@ -34,12 +34,7 @@ def multi_head_self_attention(Q: Tensor,
     """
     ############################ Your code here ############################
     # TODO: Implement the multi-head self-attention mechanism
-    attention = Q @ K.transpose(2, 3)
-    attention *= 1.0 / math.sqrt(K.size(-1))
-    attention = get_masked_attention(attention, mask, attention_mask)
-    attention = F.softmax(attention, dim=-1)
-    attention = attention_dropout(attention)
-    return attention @ V
+    pass
     ########################################################################
 
 
