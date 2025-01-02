@@ -182,6 +182,32 @@ class DPOTrainer(Trainer):
         #         and (completions[:, 1], attention_masks[:, 1]) is the negative sample
         ############################ Your code here ############################
         loss, acc = None, None
+        pos_completions = completions[:, 0]
+        neg_completions = completions[:, 1]
+        pos_attention_masks = attention_masks[:, 0]
+        neg_attention_masks = attention_masks[:, 1]
+
+        with torch.no_grad():
+            pos_sft_logits = self.sft_model(
+                pos_completions, attention_mask=pos_attention_masks
+            )
+            neg_sft_logits = self.sft_model(
+                neg_completions, attention_mask=neg_attention_masks
+            )
+
+        pos_logits = self.model(pos_completions, attention_mask=pos_attention_masks)
+        neg_logits = self.model(neg_completions, attention_mask=neg_attention_masks)
+
+        pos_log_p = torch.log_softmax(pos_logits, dim=-1)
+        neg_log_p = torch.log_softmax(neg_logits, dim=-1)
+
+        loss = self.criterion(pos_log_p, neg_log_p, pos_sft_logits, neg_sft_logits)
+
+        pos_pred = torch.argmax(pos_logits, dim=-1)
+        neg_pred = torch.argmax(neg_logits, dim=-1)
+        pos_acc = (pos_pred == pos_completions).float().mean()
+        neg_acc = (neg_pred == neg_completions).float().mean()
+        acc = (pos_acc + neg_acc) / 2
         ########################################################################
         return loss, acc
 
@@ -206,9 +232,7 @@ class DPOTrainer(Trainer):
                     attention_masks = attention_masks.to(self.device)
 
                     with torch.autocast(device_type=self.device, dtype=self.dtype):
-                        loss, acc = self.shared_step(
-                            self.model, self.sft_model, completions, attention_masks
-                        )
+                        loss, acc = self.shared_step(completions, attention_masks)
 
                     if self.grad_clip != 0.0:
                         torch.nn.utils.clip_grad_norm_(

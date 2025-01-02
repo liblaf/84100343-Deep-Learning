@@ -70,7 +70,10 @@ class GaussianDiffusion(nn.Module):
         # TODO: sample from q(x_t | x_0) with given x_0 and noise
         # TODO: hint: use extract function
         ########################################################################
-        return x_start
+        return (
+            extract(self.sqrt_alphas_cumprod, t, x_start.shape) * x_start
+            + extract(self.sqrt_one_minus_alphas_cumprod, t, x_start.shape) * noise
+        )
         ########################################################################
 
     def p_losses(self, denoise_fn, x_start, y, t):
@@ -126,6 +129,13 @@ class GaussianDiffusion(nn.Module):
         # TODO: initially x_T = N(0, 1)
         # TODO: iterative sampling from p(x_{t-1} | x_t) until t == 0
         ########################################################################
-        img = torch.randn(shape, device=y.device)
+        img = torch.randn(shape, device=self.betas.device)
+        for i in reversed(range(0, self.num_timesteps)):
+            img = self.p_sample(
+                denoise_fn,
+                img,
+                y,
+                torch.full((b,), i, device=self.betas.device, dtype=torch.long),
+            )
         ########################################################################
         return img
