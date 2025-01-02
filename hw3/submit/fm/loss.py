@@ -32,10 +32,10 @@ class DPOLoss(nn.Module):
         negative_log_probs_sft: (B, 1)
         """
         ############################ Your code here ############################
-        # TODO: Implement the DPO loss
+        # DONE: Implement the DPO loss
         ########################################################################
         positive_loss = positive_log_probs - positive_log_probs_sft
         negative_loss = negative_log_probs - negative_log_probs_sft
         loss = self.kl_beta * (positive_loss - negative_loss)
         loss = -F.logsigmoid(loss)
-        return loss
+        return loss.mean()

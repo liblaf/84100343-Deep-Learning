@@ -67,8 +67,8 @@ class GaussianDiffusion(nn.Module):
 
     def q_sample(self, x_start, t, noise):
         ############################ Your code here ############################
-        # TODO: sample from q(x_t | x_0) with given x_0 and noise
-        # TODO: hint: use extract function
+        # DONE: sample from q(x_t | x_0) with given x_0 and noise
+        # DONE: hint: use extract function
         ########################################################################
         return (
             extract(self.sqrt_alphas_cumprod, t, x_start.shape) * x_start
@@ -125,9 +125,9 @@ class GaussianDiffusion(nn.Module):
     def sample(self, denoise_fn, shape, y):
         b = shape[0]
         ############################ Your code here ############################
-        # TODO: sample from the model
-        # TODO: initially x_T = N(0, 1)
-        # TODO: iterative sampling from p(x_{t-1} | x_t) until t == 0
+        # DONE: sample from the model
+        # DONE: initially x_T = N(0, 1)
+        # DONE: iterative sampling from p(x_{t-1} | x_t) until t == 0
         ########################################################################
         img = torch.randn(shape, device=self.betas.device)
         for i in reversed(range(0, self.num_timesteps)):

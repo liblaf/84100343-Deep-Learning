@@ -175,10 +175,10 @@ class DPOTrainer(Trainer):
 
     def shared_step(self, completions, attention_masks):
         ########################################################################
-        # TODO: Implement a single step of DPO trainer
-        # TODO: You should implement the model call (including self.model and self.sft_model)
-        # TODO: After calling the model and obtaining log_p, calculate the loss and accuracy
-        # TODO: Hint: (completions[:, 0], attention_masks[:, 0]) is the positive sample
+        # DONE: Implement a single step of DPO trainer
+        # DONE: You should implement the model call (including self.model and self.sft_model)
+        # DONE: After calling the model and obtaining log_p, calculate the loss and accuracy
+        # DONE: Hint: (completions[:, 0], attention_masks[:, 0]) is the positive sample
         #         and (completions[:, 1], attention_masks[:, 1]) is the negative sample
         ############################ Your code here ############################
         loss, acc = None, None
