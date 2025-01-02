@@ -36,5 +36,6 @@ class DPOLoss(nn.Module):
         ########################################################################
         positive_loss = positive_log_probs - positive_log_probs_sft
         negative_loss = negative_log_probs - negative_log_probs_sft
-        loss = torch.mean(self.kl_beta * (positive_loss - negative_loss))
+        loss = self.kl_beta * (positive_loss - negative_loss)
+        loss = -F.logsigmoid(loss)
         return loss
