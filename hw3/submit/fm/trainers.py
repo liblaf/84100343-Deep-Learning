@@ -264,10 +264,7 @@ class DPOTrainer(Trainer):
                                 completions = completions.to(self.device)
                                 attention_masks = attention_masks.to(self.device)
                                 loss, acc = self.shared_step(
-                                    self.model,
-                                    self.sft_model,
-                                    completions,
-                                    attention_masks,
+                                    completions, attention_masks
                                 )
                                 lossf, accf = loss.item(), acc.item()
                                 losses.append(lossf)
