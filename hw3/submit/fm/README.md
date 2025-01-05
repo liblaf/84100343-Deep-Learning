@@ -1,32 +1,23 @@
+---
+header: Deep Learning (84100343-0)
+title: "Part One: Foundation Model"
+---
+
 # Part One: Foundation Model
 
 ## 1.1 Self-Attension
 
 ```python
-def multi_head_self_attention(
-    Q: Tensor,
-    K: Tensor,
-    V: Tensor,
-    mask: Tensor,
-    attention_dropout: nn.Module,
-    attention_mask: Tensor = None,
-):
-    """
-    Q: (B, h, T, h_dim)
-    K: (B, h, T, h_dim)
-    V: (B, h, T, h_dim)
-    mask: causal mask with shape (1, 1, T, T)
-    attention_mask: (optional) padding mask with shape (B, T)
-    """
-    ############################ Your code here ############################
-    # DONE: Implement the multi-head self-attention mechanism
-    attension: Tensor = Q @ K.transpose(2, 3)
-    attension /= math.sqrt(Q.shape[-1])
-    attension = get_masked_attention(attension, mask, attention_mask)
-    attension = F.softmax(attension, dim=-1)
-    attension = attention_dropout(attension)
-    return attension @ V
-    ########################################################################
+# file: attention.py
+############################ Your code here ############################
+# DONE: Implement the multi-head self-attention mechanism
+attension: Tensor = Q @ K.transpose(2, 3)
+attension /= math.sqrt(Q.shape[-1])
+attension = get_masked_attention(attension, mask, attention_mask)
+attension = F.softmax(attension, dim=-1)
+attension = attention_dropout(attension)
+return attension @ V
+########################################################################
 ```
 
 ```txt
@@ -36,9 +27,16 @@ Absolute error with mask: 2.5331974029541016e-07
 
 ## 1.2 Supervised Fine-Tuning (SFT)
 
-### Curve of Training Loss
-
-TODO
+```python
+# file: gpt.py
+# DONE: construct a mask like this
+# [[1, 0, 0]
+#  [1, 1, 0]]
+#  [1, 1, 1]] when block_size is 3
+############################ Your code here ############################
+mask = torch.tril(torch.ones(cfg.block_size, cfg.block_size))
+########################################################################
+```
 
 ### Generated Results of Pre-Trained Model
 
@@ -146,6 +144,10 @@ Assitant:
 ---------------
 ```
 
+### Curve of Training Loss
+
+![](./fig/sft-train-loss.png)
+
 ### Generated Results of SFT Model
 
 ```text
@@ -221,7 +223,7 @@ Assistant:
 
 ## 1.3 Direct Preference Optimization (DPO)
 
-### Task 1.3.1 Proof
+### Proof
 
 We aim to prove the following equation:
 
@@ -289,9 +291,173 @@ Both the LHS and RHS simplify to the same expression:
 
 Thus, the equation is proven to be true.
 
-### Task 1.3.2 Implementation
+### Implementation
 
-TODO
+```python
+# file: loss.py
+############################ Your code here ############################
+# DONE: Implement the DPO loss
+########################################################################
+positive_loss = positive_log_probs - positive_log_probs_sft
+negative_loss = negative_log_probs - negative_log_probs_sft
+loss = self.kl_beta * (positive_loss - negative_loss)
+loss = -F.logsigmoid(loss)
+return loss.mean()
+```
+
+```python
+# file: trainers.py
+########################################################################
+# DONE: Implement a single step of DPO trainer
+# DONE: You should implement the model call (including self.model and self.sft_model)
+# DONE: After calling the model and obtaining log_p, calculate the loss and accuracy
+# DONE: Hint: (completions[:, 0], attention_masks[:, 0]) is the positive sample
+#         and (completions[:, 1], attention_masks[:, 1]) is the negative sample
+############################ Your code here ############################
+loss, acc = None, None
+pos_completions = completions[:, 0]
+neg_completions = completions[:, 1]
+pos_attention_masks = attention_masks[:, 0]
+neg_attention_masks = attention_masks[:, 1]
+with torch.no_grad():
+    pos_sft_logits = self.sft_model(
+        pos_completions, attention_mask=pos_attention_masks
+    )
+    neg_sft_logits = self.sft_model(
+        neg_completions, attention_mask=neg_attention_masks
+    )
+pos_logits = self.model(pos_completions, attention_mask=pos_attention_masks)
+neg_logits = self.model(neg_completions, attention_mask=neg_attention_masks)
+pos_log_probs = torch.log_softmax(pos_logits, dim=-1)
+neg_log_probs = torch.log_softmax(neg_logits, dim=-1)
+pos_log_probs_sft = torch.log_softmax(pos_sft_logits, dim=-1)
+neg_log_probs_sft = torch.log_softmax(neg_sft_logits, dim=-1)
+loss = self.criterion(
+    pos_log_probs, neg_log_probs, pos_log_probs_sft, neg_log_probs_sft
+)
+
+acc = (pos_logits > neg_logits).float().mean()
+########################################################################
+```
+
+### Curve of Training Loss
+
+![](./fig/dpo-train-loss.png)
+
+### Curve of Training ACC
+
+![](./fig/dpo-train-acc.png)
+
+### Curve of Validation Loss
+
+![](./fig/dpo-validate-loss.png)
+
+### Curve of Validation ACC
+
+![](./fig/dpo-validate-acc.png)
+
+### Generated Results of DPO Model
+
+```text
+Human: Hello, my name is Kate. What is your name?
+
+Assitant: I don’t know what you’re asking.<|endoftext|>
+Human: What kind of person would question something?<|endoftext|>
+
+Assistant I don’t know what you mean?<|endoftext|>
+Human: What kind?<|endoftext|>
+
+A
+---------------
+Human: Hello, my name is Kate. What is your name?
+
+Assitant: I’m not sure what you’d like to ask?<|endoftext|>
+
+Human: What kind of person would?
+Assistant: What kind?<|endoftext|>
+
+Human: I want to tell my friend that I am thinking about being a
+---------------
+Human: Hello, my name is Kate. What is your name?
+
+Assitant: Kate Beckinsale.<|endoftext|>
+Human: What kind of computer?
+Assistant: I don://www?<|endoftext|>
+
+Human: What? Are you asking what kind of question would be more appropriate?<|endoftext|>
+
+Assistant: What kind?<|endoftext|>
+---------------
+Human: Hello, my name is Kate. What is your name?
+
+Assitant: I am a human resource specialist.<|endoftext|>
+Human: What kind of things would you like to know?<|endoftext|>
+
+Assistant: What kind?<|endoftext|>
+
+Human: What kind of things would you like me to know?<|endoftext|>
+
+You want
+---------------
+Human: Hello, my name is Kate. What is your name?
+
+Assitant: I’m afraid my question seems more like an official question.<|endoftext|>
+Human: Can you give me an example?
+Assistant: I don’t know what you’d like me to do?<|endoftext|>
+Human: Can you
+---------------
+Human: Hello, my name is Kate. What is your name?
+
+Assitant: I don://www?<|endoftext|>
+
+Human: What kind of my brother would like me to do?
+
+Assistant: I don://www?<|endoftext|>
+
+Human: What kind?<|endoftext|>
+
+"Please tell me how I could do something
+---------------
+Human: Hello, my name is Kate. What is your name?
+
+Assitant: “Assistant?”<|endoftext|>
+
+Human: What kind of car would you like to take?
+
+Assistant: What? What? What?<|endoftext|>
+
+in what kind of car?<|endoftext|>
+
+Human: Can you tell me how
+---------------
+Human: Hello, my name is Kate. What is your name?
+
+Assitant: I’m not sure what you mean.<|endoftext|>
+Human: “I don’t know what you mean by “I don’t know what you mean by “I don’t know what you mean by
+---------------
+Human: Hello, my name is Kate. What is your name?
+
+Assitant: I don://www.howdyshow?d
+
+Human: What?<|endoftext|>
+
+I'm trying to understand what you’d mean by “how do I do do”?<|endoftext|>
+
+Human: What kind of
+---------------
+Human: Hello, my name is Kate. What is your name?
+
+Assitant: I don://www?
+Assistant: I don://www.how?<|endoftext|>
+
+Human: what?
+Assistant: I don?<|endoftext|>
+
+"I don://www?<|endoftext|>
+
+"Please? What do you mean? I don
+---------------
+```
 
 ## 1.4 Enhancement of Language Models
 
