@@ -10,6 +10,7 @@ readarray -t files < <(git ls-files)
 files+=(
   fm/README.pdf
   gm/README.pdf
+  README.pdf
 )
 for file in "${files[@]}"; do
   mkdir --parents -- "$tmpdir/$(dirname -- "$file")"
