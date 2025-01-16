@@ -1,6 +1,6 @@
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
+from torch import nn
 
 
 def zero_module(module):
@@ -151,7 +151,7 @@ class Decoder(nn.Module):
             ResnetBlock(4 * self.num_channels, 4 * self.num_channels),
             ResnetBlock(4 * self.num_channels, 2 * self.num_channels),
         ])
-        
+
         self.up_blocks = nn.ModuleList([
             make_up_block(2 * self.num_channels, self.num_channels),
             make_up_block(self.num_channels, self.num_channels),

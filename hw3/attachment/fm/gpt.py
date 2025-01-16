@@ -1,12 +1,12 @@
 import math
+
 import torch
-from torch import nn
-from torch import Tensor
-from torch.nn import functional as F
-from configs import TrainingConfig
-from torch.utils.checkpoint import checkpoint
-from tokenizer import TiktokenTokenizer
 from attention import multi_head_self_attention
+from configs import TrainingConfig
+from tokenizer import TiktokenTokenizer
+from torch import Tensor, nn
+from torch.nn import functional as F
+from torch.utils.checkpoint import checkpoint
 
 
 class MaskedMultiheadSelfAttention(nn.Module):
@@ -37,13 +37,12 @@ class MaskedMultiheadSelfAttention(nn.Module):
         self.register_buffer("mask", mask)  # (1, 1, block_size, block_size)
 
     def forward(self, x: Tensor, attention_mask: Tensor = None):
-        """
-        x: shape of (B, T, C)
+        """x: shape of (B, T, C)
         """
         B, T, C = x.size()
         x3 = self.qkv_projection(x)  # (B, T, 3 x C)
         Q, K, V = x3.split(self.cfg.embedding_dim, dim=2)  # (B, T, C)
-        
+
         Q = Q.view(B, T, self.cfg.n_heads, C // self.cfg.n_heads).transpose(1, 2)  # (B, h, T, h_dim)
         K = K.view(B, T, self.cfg.n_heads, C // self.cfg.n_heads).transpose(1, 2)  # (B, h, T, h_dim)
         V = V.view(B, T, self.cfg.n_heads, C // self.cfg.n_heads).transpose(1, 2)  # (B, h, T, h_dim)
@@ -152,23 +151,21 @@ class GPT(nn.Module):
                                     bias=False)
 
     def forward(self, x: Tensor, attention_mask: Tensor = None):
-        """
-        x: Shape of (B, T)
+        """x: Shape of (B, T)
         """
         x = self.transformer(x, attention_mask)  # x = (B, T, embedding_dim)
         logits = self.lm_head(x)  # logits = (B, T, voca_size)
         return logits
-    
+
     def get_log_p(self, x: Tensor, attention_mask: Tensor = None):
-        """
-        x: Shape of (B, T)
+        """x: Shape of (B, T)
         """
         x, y, attention_mask = x[:, :-1], x[:, 1:], attention_mask[:, 1:]
         logits = self(x, attention_mask)
         log_prob_all_vocab = F.log_softmax(logits, dim=2)
         log_prob_output = torch.gather(log_prob_all_vocab, dim=2, index=y.unsqueeze(2)).squeeze(2)
         return (log_prob_output * attention_mask).sum(dim=-1) / attention_mask.sum(dim=-1)
-    
+
     @classmethod
     def from_pretrained(cls,
                         cfg: TrainingConfig,
@@ -182,8 +179,7 @@ class GPT(nn.Module):
 
     @torch.no_grad()
     def generate(self, idx, max_new_tokens, temperature=1.0, top_k=None):
-        """
-        https://github.com/karpathy/nanoGPT/blob/master/model.py#L343
+        """https://github.com/karpathy/nanoGPT/blob/master/model.py#L343
     
         Take a conditioning sequence of idx (LongTensor of shape (b,t)) and complete
         the sequence max_new_tokens times, feeding the predictions back into the model each time.
@@ -200,7 +196,7 @@ class GPT(nn.Module):
             # optionally crop the logits to only the top k options
             if top_k is not None:
                 v, _ = torch.topk(logits, min(top_k, logits.size(-1)))
-                logits[logits < v[:, [-1]]] = -float('Inf')
+                logits[logits < v[:, [-1]]] = -float("Inf")
             # apply softmax to convert logits to (normalized) probabilities
             probs = F.softmax(logits, dim=-1)
             # sample from the distribution

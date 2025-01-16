@@ -1,18 +1,18 @@
-import torch
-from torch import nn
-from torch.utils.data import DataLoader
-from loss import CrossEntropyLoss, DPOLoss
-import torch.optim as optim
-from torch.cuda.amp.grad_scaler import GradScaler
-import statistics
-from tqdm import tqdm, trange
-from datetime import datetime
-from torch.utils.tensorboard import SummaryWriter
-import os
 import json
+import os
 import random
-from torchinfo import summary
+import statistics
+from datetime import datetime
+
+import torch
 from configs import TrainingConfig
+from loss import CrossEntropyLoss, DPOLoss
+from torch import nn, optim
+from torch.cuda.amp.grad_scaler import GradScaler
+from torch.utils.data import DataLoader
+from torch.utils.tensorboard import SummaryWriter
+from torchinfo import summary
+from tqdm import tqdm, trange
 
 
 class Trainer:
@@ -23,30 +23,30 @@ class Trainer:
         random.seed(1)
 
     def save_hyperparams(self, hp):
-        if not os.path.exists(f'./runs/{self.run_name}'):
-            os.makedirs(f'./runs/{self.run_name}')
+        if not os.path.exists(f"./runs/{self.run_name}"):
+            os.makedirs(f"./runs/{self.run_name}")
 
-        with open(f'./runs/{self.run_name}/hyperparams.json', 'w') as fp:
+        with open(f"./runs/{self.run_name}/hyperparams.json", "w") as fp:
             json.dump(hp, fp, indent=4)
 
     def save_metrics(self, metrics):
-        if not os.path.exists(f'./runs/{self.run_name}'):
-            os.makedirs(f'./runs/{self.run_name}')
-        with open(f'./runs/{self.run_name}/metrics.json', 'w') as fp:
+        if not os.path.exists(f"./runs/{self.run_name}"):
+            os.makedirs(f"./runs/{self.run_name}")
+        with open(f"./runs/{self.run_name}/metrics.json", "w") as fp:
             json.dump(metrics, fp, indent=4)
 
     def save_states(self, step, is_last=False):
-        if not os.path.exists(f'./runs/{self.run_name}'):
-            os.makedirs(f'./runs/{self.run_name}')
-        file_name = f'{self.run_name}_final.pt' if is_last else f'{self.run_name}_step{step}.pt'
+        if not os.path.exists(f"./runs/{self.run_name}"):
+            os.makedirs(f"./runs/{self.run_name}")
+        file_name = f"{self.run_name}_final.pt" if is_last else f"{self.run_name}_step{step}.pt"
         torch.save(
             {
-                'step': step,
-                'model_state_dict':
+                "step": step,
+                "model_state_dict":
                     self.model.state_dict(),  # Save the unoptimized model
-                'optimizer_state_dict': self.optimizer.state_dict(),
+                "optimizer_state_dict": self.optimizer.state_dict(),
             },
-            f'./runs/{self.run_name}/{file_name}')
+            f"./runs/{self.run_name}/{file_name}")
 
 
 class SFTTrainer(Trainer):
@@ -57,7 +57,7 @@ class SFTTrainer(Trainer):
         self.cfg = cfg
         self.run_name = f"sft_{cfg.exp_name}_{datetime.now().strftime('%Y%m%d%H%M')}"
         self.device = device
-        assert self.device == 'cuda'
+        assert self.device == "cuda"
         self.num_steps = cfg.num_steps
         self.save_freq = 20000
         self.train_dataloader =  iter(
@@ -91,7 +91,7 @@ class SFTTrainer(Trainer):
         summary(self.model, input_data=torch.ones(1, 1024).long())
 
         self.model.to(self.device)
-        writer = SummaryWriter(f'./runs/{self.run_name}/logs', max_queue=40)
+        writer = SummaryWriter(f"./runs/{self.run_name}/logs", max_queue=40)
         scaler = GradScaler(enabled=self.dtype != torch.float32)
 
         self.model.train()
@@ -115,7 +115,7 @@ class SFTTrainer(Trainer):
                 scaler.update()
                 self.optimizer.zero_grad(set_to_none=True)
                 lossf = loss.item()
-                writer.add_scalar('Loss/train/step', lossf, step)
+                writer.add_scalar("Loss/train/step", lossf, step)
 
                 pbar.set_description(f"Step {step}, batch loss {round(lossf, 3)}")
 
@@ -133,7 +133,7 @@ class DPOTrainer(Trainer):
         self.cfg = cfg
         self.run_name = f"dpo_{cfg.exp_name}_{datetime.now().strftime('%Y%m%d%H%M')}"
         self.device = device
-        assert self.device == 'cuda'
+        assert self.device == "cuda"
         self.num_epochs = cfg.num_epochs
         self.eval_freq = 5000
         self.save_freq = 20000
@@ -163,7 +163,7 @@ class DPOTrainer(Trainer):
             **cfg.dict(),
         }
         self.save_hyperparams(hp)
-    
+
     def shared_step(self, completions, attention_masks):
         ########################################################################
         # TODO: Implement a single step of DPO trainer
@@ -182,7 +182,7 @@ class DPOTrainer(Trainer):
         self.model.to(self.device)
         self.sft_model.to(self.device)
         self.sft_model.eval()
-        writer = SummaryWriter(f'./runs/{self.run_name}/logs', max_queue=40)
+        writer = SummaryWriter(f"./runs/{self.run_name}/logs", max_queue=40)
         scaler = GradScaler(enabled=self.dtype != torch.float32)
 
         self.model.train()
@@ -209,8 +209,8 @@ class DPOTrainer(Trainer):
                     self.optimizer.zero_grad(set_to_none=True)
                     lossf = loss.item()
                     accf = acc.item()
-                    writer.add_scalar('Loss/train/step', lossf, steps)
-                    writer.add_scalar('Acc/train/step', accf, steps)
+                    writer.add_scalar("Loss/train/step", lossf, steps)
+                    writer.add_scalar("Acc/train/step", accf, steps)
                     pbar.set_description(f"Epoch {epoch}, batch loss {round(lossf, 3)}, acc {round(accf, 3)}")
 
                     if steps != 0 and steps % self.save_freq == 0:
@@ -228,8 +228,8 @@ class DPOTrainer(Trainer):
                                 losses.append(lossf)
                                 accs.append(accf)
                             total_loss, total_acc = statistics.mean(losses), statistics.mean(accs)
-                            writer.add_scalar('Loss/test/step', total_loss, steps)
-                            writer.add_scalar('Acc/test/step', total_acc, steps)
-                            print(f'Step: {steps + 1}, Test Loss: {total_loss}, Acc: {total_acc}')
+                            writer.add_scalar("Loss/test/step", total_loss, steps)
+                            writer.add_scalar("Acc/test/step", total_acc, steps)
+                            print(f"Step: {steps + 1}, Test Loss: {total_loss}, Acc: {total_acc}")
 
             self.save_states(steps, True)

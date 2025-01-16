@@ -1,7 +1,16 @@
 import math
+
 import torch
-import torch.nn as nn
-from module import Normalize, ResnetBlock, make_down_block, make_up_block, Encoder, Decoder, zero_module
+from module import (
+    Decoder,
+    Encoder,
+    Normalize,
+    ResnetBlock,
+    make_down_block,
+    make_up_block,
+    zero_module,
+)
+from torch import nn
 
 
 class VAE(nn.Module):
@@ -24,11 +33,11 @@ class VAE(nn.Module):
         ########################################################################
         x_recon = self.decoder(z)
         return x_recon, mu, logvar
-    
+
     def encode(self, x):
         mu, _ = self.encoder(x).chunk(2, dim=1)
         return mu
-    
+
     def decode(self, z):
         return self.decoder(z)
 
@@ -36,7 +45,7 @@ class VAE(nn.Module):
 class Discriminator(nn.Module):
 
     def __init__(self,
-                 in_channels=3, 
+                 in_channels=3,
                  num_channels=32):
         super().__init__()
         sequence = [
@@ -56,13 +65,13 @@ class Discriminator(nn.Module):
         ]
         self.main = nn.Sequential(*sequence)
         self.apply(Discriminator.weights_init)
-    
+
     @staticmethod
     def weights_init(m):
         classname = m.__class__.__name__
-        if classname.find('Conv') != -1:
+        if classname.find("Conv") != -1:
             nn.init.normal_(m.weight.data, 0.0, 0.02)
-        elif classname.find('BatchNorm') != -1:
+        elif classname.find("BatchNorm") != -1:
             nn.init.normal_(m.weight.data, 1.0, 0.02)
             nn.init.constant_(m.bias.data, 0)
 
@@ -110,7 +119,7 @@ class UNet(nn.Module):
                 nn.Conv2d(num_channels, out_channels, kernel_size=3, stride=1, padding=1)
             )
         )
-    
+
     @staticmethod
     def timestep_embedding(t, dim, max_period=10000):
         half = dim // 2
@@ -140,7 +149,7 @@ class UNet(nn.Module):
             hs.append(h)
         for mid_module in self.mid_block:
             h = mid_module(h, emb)
-        for up_block, h_skip in zip(self.up_blocks, reversed(hs)):
+        for up_block, h_skip in zip(self.up_blocks, reversed(hs), strict=False):
             h = torch.cat([h, h_skip], dim=1)
             for up_module in up_block:
                 h = up_module(h, emb)

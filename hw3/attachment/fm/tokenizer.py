@@ -1,8 +1,8 @@
-import torch
 import tiktoken
+import torch
 
 
-class TiktokenTokenizer():
+class TiktokenTokenizer:
 
     def __init__(self, name) -> None:
         self.enc = tiktoken.get_encoding(name)

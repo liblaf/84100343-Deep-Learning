@@ -1,14 +1,14 @@
 import click
 import torch
-from trainers import VAETrainer
-from model import VAE
 import torchvision.transforms as T
-from torchvision.datasets import MNIST
 from configs import TrainingConfig
+from model import VAE
+from torchvision.datasets import MNIST
+from trainers import VAETrainer
 
 
 def train(ckpt, batch_size, exp_name):
-    device = 'cuda'
+    device = "cuda"
     cfg = TrainingConfig()
     cfg.num_epochs = 10
     cfg.batch_size = batch_size
@@ -32,9 +32,9 @@ def train(ckpt, batch_size, exp_name):
 
 
 @click.command()
-@click.option('--ckpt', '-c', default="./checkpoints/gpt2_pretrained.pt")
-@click.option('--batch-size', '-b', default=64)
-@click.option('--exp-name', '-n', default="default")
+@click.option("--ckpt", "-c", default="./checkpoints/gpt2_pretrained.pt")
+@click.option("--batch-size", "-b", default=64)
+@click.option("--exp-name", "-n", default="default")
 def main(ckpt, batch_size, exp_name):
     torch.manual_seed(1234)
     train(ckpt, batch_size, exp_name)

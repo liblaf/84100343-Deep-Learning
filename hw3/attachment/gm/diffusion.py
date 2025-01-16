@@ -1,8 +1,9 @@
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import numpy as np
 from functools import partial
+
+import numpy as np
+import torch
+import torch.nn.functional as F
+from torch import nn
 
 
 def extract(a, t, x_shape):
@@ -79,7 +80,7 @@ class GaussianDiffusion(nn.Module):
         loss = F.mse_loss(pred_noise, noise)
 
         return loss
-    
+
     def forward(self, denoise_fn, x_start, y):
         t = torch.randint(0, self.num_timesteps, (x_start.shape[0],), device=x_start.device).long()
         return self.p_losses(denoise_fn, x_start, y, t)
@@ -91,7 +92,7 @@ class GaussianDiffusion(nn.Module):
         )
         posterior_variance = extract(self.posterior_variance, t, x_t.shape)
         return posterior_mean, posterior_variance
-    
+
     def predict_start_from_noise(self, x, t, noise):
         return (
             extract(self.sqrt_recip_alphas_cumprod, t, x.shape) * x
