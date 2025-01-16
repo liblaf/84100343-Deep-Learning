@@ -1,15 +1,15 @@
 import click
 import torch
-from trainers import LDMTrainer
-from model import VAE, UNet
-from diffusion import GaussianDiffusion
 import torchvision.transforms as T
-from torchvision.datasets import CIFAR10
 from configs import TrainingConfig
+from diffusion import GaussianDiffusion
+from model import VAE, UNet
+from torchvision.datasets import CIFAR10
+from trainers import LDMTrainer
 
 
 def train(vae_ckpt, batch_size, exp_name):
-    device = 'cuda'
+    device = "cuda"
     cfg = TrainingConfig()
     cfg.num_epochs = 100
     cfg.batch_size = batch_size
@@ -35,9 +35,9 @@ def train(vae_ckpt, batch_size, exp_name):
 
 
 @click.command()
-@click.option('--vae_ckpt', '-c', default=None)
-@click.option('--batch-size', '-b', default=64)
-@click.option('--exp-name', '-n', default="default")
+@click.option("--vae_ckpt", "-c", default=None)
+@click.option("--batch-size", "-b", default=64)
+@click.option("--exp-name", "-n", default="default")
 def main(vae_ckpt, batch_size, exp_name):
     torch.manual_seed(1234)
     train(vae_ckpt, batch_size, exp_name)

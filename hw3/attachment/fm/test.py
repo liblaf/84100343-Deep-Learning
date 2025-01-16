@@ -1,8 +1,8 @@
-from gpt import GPT
-from configs import get_configs
-import torch
-import tiktoken
 import click
+import tiktoken
+import torch
+from configs import get_configs
+from gpt import GPT
 
 
 def prepare_gpt2_input(prompt, device):
@@ -28,14 +28,14 @@ def generate_gpt2(model, prompt, device, samples=2):
                            temperature=temperature,
                            top_k=top_k)
         print(decode(y[0].tolist()))
-        print('---------------')
+        print("---------------")
 
 
 @click.command()
-@click.option('--task', '-t', default=0)
-@click.option('--ckpt', '-c', default="./checkpoints/gpt2_pretrained.pt")
+@click.option("--task", "-t", default=0)
+@click.option("--ckpt", "-c", default="./checkpoints/gpt2_pretrained.pt")
 def main(task, ckpt):
-    device = 'cuda'
+    device = "cuda"
     cfg = get_configs("gpt2")
 
     if task == 0:
@@ -48,7 +48,7 @@ Assitant:"""
 Assitant:"""
 
     model = GPT.from_pretrained(cfg, ckpt)
-    
+
     generate_gpt2(model, prompt, device, samples=10)
 
 

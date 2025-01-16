@@ -1,17 +1,13 @@
-import math
 import torch
-from torch import nn
-from torch import Tensor
-from torch.nn import functional as F
+from torch import Tensor, nn
 
 
 def get_masked_attention(attention: Tensor, mask: Tensor, attention_mask: Tensor = None):
-    """
-    attention: (B, h, T, T)
+    """attention: (B, h, T, T)
     mask: (1, 1, T, T)
     attention_mask: (B, T)
     """
-    attention = attention.masked_fill(mask == 0, float('-inf'))
+    attention = attention.masked_fill(mask == 0, float("-inf"))
     if attention_mask is not None:
         attention_mask = attention_mask.unsqueeze(1).unsqueeze(2)
         attention_mask = (1.0 - attention_mask) * torch.finfo(attention.dtype).min
@@ -25,8 +21,7 @@ def multi_head_self_attention(Q: Tensor,
                               mask: Tensor,
                               attention_dropout: nn.Module,
                               attention_mask: Tensor = None):
-    """
-    Q: (B, h, T, h_dim)
+    """Q: (B, h, T, h_dim)
     K: (B, h, T, h_dim)
     V: (B, h, T, h_dim)
     mask: causal mask with shape (1, 1, T, T)
@@ -34,7 +29,6 @@ def multi_head_self_attention(Q: Tensor,
     """
     ############################ Your code here ############################
     # TODO: Implement the multi-head self-attention mechanism
-    pass
     ########################################################################
 
 

@@ -1,4 +1,4 @@
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 
 
 @dataclass
@@ -39,7 +39,7 @@ def get_configs(name) -> TrainingConfig:
             block_size=1024,
             vocab_size=50257
         )
-    elif name == "gpt2/dropout":
+    if name == "gpt2/dropout":
         return TrainingConfig(
             n_layers=12,
             n_heads=12,

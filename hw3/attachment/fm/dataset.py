@@ -1,16 +1,17 @@
-from torch.utils.data import Dataset
-import torch
-import random
 import json
-from tokenizer import TiktokenTokenizer
+import random
+
 import pandas as pd
+import torch
+from tokenizer import TiktokenTokenizer
+from torch.utils.data import Dataset
 
 
 class EYLSFTStaticDataset(Dataset):
 
     def __init__(self,
                  block_size,
-                 split='train',
+                 split="train",
                  max_examples=None) -> None:
         super().__init__()
         if split == "train":
@@ -21,8 +22,8 @@ class EYLSFTStaticDataset(Dataset):
                 dataset = json.load(fp)
         self.tokens = []
         self.block_size = block_size
-        
-        tokenizer = TiktokenTokenizer('gpt2')
+
+        tokenizer = TiktokenTokenizer("gpt2")
 
         cnt = 0
         print(f"Loading EYLSFTStaticDataset {split} split")
@@ -31,7 +32,7 @@ class EYLSFTStaticDataset(Dataset):
             response_text = chosen + "<|endoftext|>"
             response = tokenizer(response_text)
 
-            self.tokens += response['input_ids']
+            self.tokens += response["input_ids"]
             if max_examples and cnt >= max_examples:
                 break
 
@@ -50,38 +51,37 @@ class EYLSFTStaticDataset(Dataset):
 
 
 class DahoasRMStaticDataset(Dataset):
-    """
-    https://huggingface.co/datasets/Dahoas/rm-static
+    """https://huggingface.co/datasets/Dahoas/rm-static
     """
 
     def __init__(self,
                  block_size,
-                 split='train',
+                 split="train",
                  max_examples=None) -> None:
         super().__init__()
 
-        splits = {'train': 'data/train-00000-of-00001-2a1df75c6bce91ab.parquet',
-                  'test': 'data/test-00000-of-00001-8c7c51afc6d45980.parquet'}
+        splits = {"train": "data/train-00000-of-00001-2a1df75c6bce91ab.parquet",
+                  "test": "data/test-00000-of-00001-8c7c51afc6d45980.parquet"}
         dataset = pd.read_parquet("./data/rm-static/" + splits[split])
         self.pairs = []
         self.masks = []
 
-        tokenizer = TiktokenTokenizer('gpt2')
+        tokenizer = TiktokenTokenizer("gpt2")
 
         cnt = 0
         print(f"Loading DahoasRMStaticDataset {split} split")
         for _, data in dataset.iterrows():
             cnt += 1
-            prompt = data['prompt']
+            prompt = data["prompt"]
 
-            positive_text = prompt + data['chosen'] + "<|endoftext|>"
+            positive_text = prompt + data["chosen"] + "<|endoftext|>"
             positive = tokenizer(positive_text,
                                  max_length=block_size,
                                  padding="max_length",
                                  truncation=True,
                                  return_tensors="pt")
 
-            negative_text = prompt + data['rejected'] + "<|endoftext|>"
+            negative_text = prompt + data["rejected"] + "<|endoftext|>"
             negative = tokenizer(negative_text,
                                  max_length=block_size,
                                  padding="max_length",
@@ -89,12 +89,12 @@ class DahoasRMStaticDataset(Dataset):
                                  return_tensors="pt")
 
             self.pairs.append(
-                torch.stack((positive['input_ids'], negative['input_ids']),
+                torch.stack((positive["input_ids"], negative["input_ids"]),
                             dim=0))
 
             self.masks.append(
                 torch.stack(
-                    (positive['attention_mask'], negative['attention_mask']),
+                    (positive["attention_mask"], negative["attention_mask"]),
                     dim=0))
             if max_examples and cnt >= max_examples:
                 break

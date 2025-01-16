@@ -231,7 +231,7 @@ We aim to prove the following equation:
 \beta \log{\frac{p_{\text{DPO}}(y_w | x)}{p_{\text{SFT}}(y_w | x)}} - \beta \log{\frac{p_{\text{DPO}}(y_l | x)}{p_{\text{SFT}}(y_l | x)}} = \beta \log{\frac{p_{\text{DPO}}(x, y_w)}{p_{\text{SFT}}(x, y_w)}} - \beta \log{\frac{p_{\text{DPO}}(x, y_l)}{p_{\text{SFT}}(x, y_l)}}
 ```
 
-###### Left-Hand Side (LHS):
+###### Left-Hand Side (LHS)
 
 ```math
 \text{LHS} = \beta \left[ \log{\frac{p_{\text{DPO}}(y_w | x)}{p_{\text{SFT}}(y_w | x)}} - \log{\frac{p_{\text{DPO}}(y_l | x)}{p_{\text{SFT}}(y_l | x)}} \right]
@@ -243,7 +243,7 @@ Using the logarithmic identity \(\log{a} - \log{b} = \log{\frac{a}{b}}\):
 \text{LHS} = \beta \log{\left( \frac{p_{\text{DPO}}(y_w | x) / p_{\text{SFT}}(y_w | x)}{p_{\text{DPO}}(y_l | x) / p_{\text{SFT}}(y_l | x)} \right)} = \beta \log{\left( \frac{p_{\text{DPO}}(y_w | x) p_{\text{SFT}}(y_l | x)}{p_{\text{SFT}}(y_w | x) p_{\text{DPO}}(y_l | x)} \right)}
 ```
 
-###### Right-Hand Side (RHS):
+###### Right-Hand Side (RHS)
 
 ```math
 \text{RHS} = \beta \left[ \log{\frac{p_{\text{DPO}}(x, y_w)}{p_{\text{SFT}}(x, y_w)}} - \log{\frac{p_{\text{DPO}}(x, y_l)}{p_{\text{SFT}}(x, y_l)}} \right]
@@ -255,7 +255,7 @@ Using the same logarithmic identity:
 \text{RHS} = \beta \log{\left( \frac{p_{\text{DPO}}(x, y_w) / p_{\text{SFT}}(x, y_w)}{p_{\text{DPO}}(x, y_l) / p_{\text{SFT}}(x, y_l)} \right)} = \beta \log{\left( \frac{p_{\text{DPO}}(x, y_w) p_{\text{SFT}}(x, y_l)}{p_{\text{SFT}}(x, y_w) p_{\text{DPO}}(x, y_l)} \right)}
 ```
 
-###### Express Joint Probabilities:
+###### Express Joint Probabilities
 
 Recall that $p(x, y) = p(y | x) p(x)$, so:
 
@@ -281,7 +281,7 @@ Simplify by canceling out $p_{\text{DPO}}(x)$ and $p_{\text{SFT}}(x)$:
 \text{RHS} = \beta \log{\left( \frac{p_{\text{DPO}}(y_w | x) p_{\text{SFT}}(y_l | x)}{p_{\text{SFT}}(y_w | x) p_{\text{DPO}}(y_l | x)} \right)}
 ```
 
-###### Conclusion:
+###### Conclusion
 
 Both the LHS and RHS simplify to the same expression:
 

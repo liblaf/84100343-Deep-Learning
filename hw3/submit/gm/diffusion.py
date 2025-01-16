@@ -130,7 +130,7 @@ class GaussianDiffusion(nn.Module):
         # DONE: iterative sampling from p(x_{t-1} | x_t) until t == 0
         ########################################################################
         img = torch.randn(shape, device=self.betas.device)
-        for i in reversed(range(0, self.num_timesteps)):
+        for i in reversed(range(self.num_timesteps)):
             img = self.p_sample(
                 denoise_fn,
                 img,
